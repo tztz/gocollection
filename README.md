@@ -2,6 +2,8 @@
 
 ![Build status](https://github.com/tztz/gocollection/actions/workflows/build.yml/badge.svg)
 
+A Go library for handling sets.
+
 ## Set
 
 An API to handle sets providing methods from set theory.
