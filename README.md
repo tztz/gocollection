@@ -2,7 +2,9 @@
 
 ![Build status](https://github.com/tztz/gocollection/actions/workflows/build.yml/badge.svg)
 
-An API to handle sets providing methods from Set theory.
+## Set
+
+An API to handle sets providing methods from set theory.
 
 - A `Set` is a collection of unique elements having the same type `T`.
 - Values of type `V` can be associated with the elements - but don't have to.
