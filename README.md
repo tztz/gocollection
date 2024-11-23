@@ -19,23 +19,43 @@ Example
 
 ```go
 // First set
-set1 := NewWithValues[string, string]()
+set1 := set.NewWithValues[string, string]()
 set1.AddWithValue("apple", "red")
 set1.AddWithValue("banana", "yellow")
 set1.AddWithValue("cherry", "dark red")
+set1.AddWithValue("brick", "red")
 
 // Second set
-set2 := NewWithValues[string, string]()
+set2 := set.NewWithValues[string, string]()
 set2.AddWithValue("apple", "green")
 set2.AddWithValue("banana", "brownish")
 set2.AddWithValue("mango", "green-orange")
+set2.AddWithValue("brick", "red")
+
+// Remove element
+set2.Remove("brick")
 
 // Calculate intersection
 intersectedSet := set1.Intersect(set2)
 
-// Result
-fmt.Println(intersectedSet.Size()) // 2
-fmt.Println(intersectedSet.List()) // [banana apple]
+// Filter set
+filteredSet := intersectedSet.Filter(func(elem string) bool {
+    return strings.Contains(elem, "a")
+})
+
+fmt.Println(intersectedSet.Size())             // 2
+fmt.Println(intersectedSet.Contains("banana")) // true
+fmt.Println(intersectedSet.List())             // [banana apple]
+fmt.Println(intersectedSet)                    // banana, apple
+fmt.Println(intersectedSet.StringWithValues()) // apple (green), banana (brownish)
+fmt.Println(set1.Equals(set2))                 // false
+fmt.Println(intersectedSet.IsSubset(set1))     // true
+fmt.Println(filteredSet)                       // apple, banana
+
+// Clear set
+intersectedSet.Clear()
+
+fmt.Println(intersectedSet.Size()) // 0
 ```
 
 Todo: more doc to come ...

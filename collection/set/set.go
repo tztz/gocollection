@@ -1,3 +1,4 @@
+// An API to handle sets providing methods from set theory.
 package set
 
 import (
@@ -8,11 +9,11 @@ import (
 type internalEmptyType struct{}
 type FilterFunc[T comparable] func(T) bool
 
-// Set is a collection of unique elements having the same type T.
+// A Set is a collection of unique elements having the same type T.
 // Values of type V can be associated with the elements - but don't have to.
-// Think of a Set as a map[T]V with keys of type T and values of type V, where the values are just associated data.
-// If you don't need values, you can use a Set[T, internalEmptyType] to save memory. Then it's just a set of elements like a set of labels.
-// A Set can be empty.
+// A Set is actually a map[T]V with keys of type T and values of type V, where the values are just associated data.
+// If you don't need values, you can omit them in the Set to save memory. Then it's just a set of elements like a set of labels.
+// A Set can, of course, be empty.
 // The zero value of a Set is an empty set.
 type Set[T comparable, V any] struct {
 	elements map[T]V
