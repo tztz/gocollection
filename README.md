@@ -58,4 +58,32 @@ intersectedSet.Clear()
 fmt.Println(intersectedSet.Size()) // 0
 ```
 
-Todo: more doc to come ...
+## Methods
+
+### Creating new set
+
+- Copy
+- Intersect
+- Unite
+- UniteDisjunctively
+- Subtract
+- Filter
+
+### Operating on same set
+
+- AddWithValue
+- AddWithoutValue
+- Remove
+- AddAll
+- RemoveAll
+- Clear
+
+### Informative
+
+- Size
+- List
+- Contains
+- Equals
+- IsSubset
+- String
+- StringWithValues
