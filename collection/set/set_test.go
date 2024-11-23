@@ -154,215 +154,6 @@ func TestShouldRemoveItemFromSet(t *testing.T) {
 	assert.False(t, set.Contains("banana"))
 }
 
-func TestShouldListAllSetItems(t *testing.T) {
-	// Given
-	fruitSet := NewWithoutValues[string]()
-	fruitSet.AddWithoutValue("apple")
-	fruitSet.AddWithoutValue("banana")
-	fruitSet.AddWithoutValue("cherry")
-	// When
-	items1 := fruitSet.List()
-	// Then
-	assert.ElementsMatch(t, []string{"apple", "banana", "cherry"}, items1)
-	assert.Equal(t, 3, fruitSet.Size())
-
-	// Given
-	emptySet := NewWithoutValues[string]()
-	// When
-	items2 := emptySet.List()
-	// Then
-	assert.ElementsMatch(t, []string{}, items2)
-	assert.Equal(t, 0, emptySet.Size())
-}
-
-func TestShouldClearSet(t *testing.T) {
-	// Given
-	set := NewWithoutValues[string]()
-	set.AddWithoutValue("apple")
-	set.AddWithoutValue("banana")
-	set.AddWithoutValue("cherry")
-
-	// When
-	set.Clear()
-
-	// Then
-	assert.Equal(t, 0, set.Size())
-	assert.Equal(t, []string{}, set.List())
-	assert.False(t, set.Contains("apple"))
-	assert.False(t, set.Contains("banana"))
-	assert.False(t, set.Contains("cherry"))
-}
-
-func TestShouldGetCanonicalStringRepresentationOfSetWithoutValues(t *testing.T) {
-	// Given
-	set1 := NewWithoutValues[string]()
-	set1.AddWithoutValue("apple")
-	set1.AddWithoutValue("banana")
-	set1.AddWithoutValue("cherry")
-	// When
-	str1 := set1.String()
-	// Then
-	assert.Equal(t, 21, len(str1))
-	splitStrings := strings.Split(str1, ", ")
-	slices.Sort(splitStrings)
-	assert.Equal(t, "apple, banana, cherry", strings.Join(splitStrings, ", "))
-
-	// Given
-	set2 := NewWithoutValues[string]()
-	// When
-	str2 := set2.String()
-	// Then
-	assert.Equal(t, "", str2)
-}
-
-func TestShouldGetCanonicalStringRepresentationOfSetWithValues(t *testing.T) {
-	// Given
-	set1 := NewWithValues[string, string]()
-	set1.AddWithValue("apple", "red")
-	set1.AddWithValue("banana", "yellow")
-	set1.AddWithValue("cherry", "dark red")
-	// When
-	str1 := set1.String()
-	// Then
-	assert.Equal(t, 21, len(str1))
-	splitStrings := strings.Split(str1, ", ")
-	slices.Sort(splitStrings)
-	assert.Equal(t, "apple, banana, cherry", strings.Join(splitStrings, ", "))
-
-	// Given
-	set2 := NewWithValues[string, string]()
-	// When
-	str2 := set2.String()
-	// Then
-	assert.Equal(t, "", str2)
-}
-
-func TestStringWithValuesShouldGetStringRepresentationOfSetWithoutValues(t *testing.T) {
-	// Given
-	set1 := NewWithoutValues[string]()
-	set1.AddWithoutValue("apple")
-	set1.AddWithoutValue("banana")
-	set1.AddWithoutValue("cherry")
-	// When
-	str1 := set1.StringWithValues()
-	// Then
-	assert.Equal(t, 36, len(str1))
-	splitStrings := strings.Split(str1, ", ")
-	slices.Sort(splitStrings)
-	assert.Equal(t, "apple ({}), banana ({}), cherry ({})", strings.Join(splitStrings, ", "))
-
-	// Given
-	set2 := NewWithValues[string, string]()
-	// When
-	str2 := set2.StringWithValues()
-	// Then
-	assert.Equal(t, "", str2)
-}
-
-func TestStringWithValuesShouldGetStringRepresentationOfSetWithValues(t *testing.T) {
-	// Given
-	set1 := NewWithValues[string, string]()
-	set1.AddWithValue("apple", "red")
-	set1.AddWithValue("banana", "yellow")
-	set1.AddWithValue("cherry", "dark red")
-	// When
-	str1 := set1.StringWithValues()
-	// Then
-	assert.Equal(t, 47, len(str1))
-	splitStrings := strings.Split(str1, ", ")
-	slices.Sort(splitStrings)
-	assert.Equal(t, "apple (red), banana (yellow), cherry (dark red)", strings.Join(splitStrings, ", "))
-
-	// Given
-	set2 := NewWithValues[string, string]()
-	// When
-	str2 := set2.StringWithValues()
-	// Then
-	assert.Equal(t, "", str2)
-}
-
-func TestTwoSetsWithoutValuesAndWithSameContentShouldBeEqual(t *testing.T) {
-	// Given
-	set1 := NewWithoutValues[string]()
-	set1.AddWithoutValue("apple")
-	set1.AddWithoutValue("banana")
-	set1.AddWithoutValue("cherry")
-
-	set2 := NewWithoutValues[string]()
-	set2.AddWithoutValue("apple")
-	set2.AddWithoutValue("banana")
-	set2.AddWithoutValue("cherry")
-
-	// Expect
-	assert.True(t, set1.Equals(set2))
-
-	// When adding an already existing item
-	set1.AddWithoutValue("apple")
-	// Then the sets remain equal
-	assert.True(t, set1.Equals(set2))
-
-	// When
-	set1.AddWithoutValue("brick")
-	// Then
-	assert.False(t, set1.Equals(set2))
-
-	// When
-	set2.AddWithoutValue("brick")
-	// Then
-	assert.True(t, set1.Equals(set2))
-
-	// When
-	set2.AddWithoutValue("stone")
-	// Then
-	assert.False(t, set1.Equals(set2))
-
-	// When
-	set1.AddWithoutValue("bottle")
-	// Then
-	assert.False(t, set1.Equals(set2))
-}
-
-func TestTwoSetsWithValuesAndWithSameContentShouldBeEqual(t *testing.T) {
-	// Given
-	set1 := NewWithValues[string, string]()
-	set1.AddWithValue("apple", "red")
-	set1.AddWithValue("banana", "yellow")
-	set1.AddWithValue("cherry", "dark red")
-
-	set2 := NewWithValues[string, string]()
-	set2.AddWithValue("apple", "green")
-	set2.AddWithValue("banana", "brownish")
-	set2.AddWithValue("cherry", "glossy red")
-
-	// Expect
-	assert.True(t, set1.Equals(set2))
-
-	// When adding an already existing item
-	set1.AddWithValue("apple", "red but with a hint of green")
-	// Then the sets remain equal
-	assert.True(t, set1.Equals(set2))
-
-	// When
-	set1.AddWithValue("brick", "brick red")
-	// Then
-	assert.False(t, set1.Equals(set2))
-
-	// When
-	set2.AddWithValue("brick", "brick red with a hint of black")
-	// Then
-	assert.True(t, set1.Equals(set2))
-
-	// When
-	set2.AddWithValue("stone", "grey")
-	// Then
-	assert.False(t, set1.Equals(set2))
-
-	// When
-	set1.AddWithValue("bottle", "green")
-	// Then
-	assert.False(t, set1.Equals(set2))
-}
-
 func TestShouldAddAllGivenItemsWithoutValuesToSet(t *testing.T) {
 	// Given
 	set1 := NewWithoutValues[string]()
@@ -486,6 +277,284 @@ func TestShouldRemoveAllGivenItemsFromSet(t *testing.T) {
 	assert.False(t, set1.Contains("banana"))
 	assert.False(t, set1.Contains("cherry"))
 	assert.False(t, set1.Contains("mango"))
+}
+
+func TestShouldClearSet(t *testing.T) {
+	// Given
+	set := NewWithoutValues[string]()
+	set.AddWithoutValue("apple")
+	set.AddWithoutValue("banana")
+	set.AddWithoutValue("cherry")
+
+	// When
+	set.Clear()
+
+	// Then
+	assert.Equal(t, 0, set.Size())
+	assert.Equal(t, []string{}, set.List())
+	assert.False(t, set.Contains("apple"))
+	assert.False(t, set.Contains("banana"))
+	assert.False(t, set.Contains("cherry"))
+}
+
+func TestShouldCalculateSizeOfSet(t *testing.T) {
+	// Given
+	set := NewWithoutValues[string]()
+
+	// Expect
+	assert.Equal(t, 0, set.Size())
+
+	// When
+	set.AddWithoutValue("apple")
+	set.AddWithoutValue("banana")
+	set.AddWithoutValue("cherry")
+
+	// Then
+	assert.Equal(t, 3, set.Size())
+
+	// When
+	set.AddWithoutValue("mango")
+	set.AddWithoutValue("pear")
+
+	// Then
+	assert.Equal(t, 5, set.Size())
+}
+
+func TestShouldListAllSetItems(t *testing.T) {
+	// Given
+	fruitSet := NewWithoutValues[string]()
+	fruitSet.AddWithoutValue("apple")
+	fruitSet.AddWithoutValue("banana")
+	fruitSet.AddWithoutValue("cherry")
+	// When
+	items1 := fruitSet.List()
+	// Then
+	assert.ElementsMatch(t, []string{"apple", "banana", "cherry"}, items1)
+	assert.Equal(t, 3, fruitSet.Size())
+
+	// Given
+	emptySet := NewWithoutValues[string]()
+	// When
+	items2 := emptySet.List()
+	// Then
+	assert.ElementsMatch(t, []string{}, items2)
+	assert.Equal(t, 0, emptySet.Size())
+}
+
+// TODO: Add tests for Contains
+
+func TestTwoSetsWithoutValuesAndWithSameContentShouldBeEqual(t *testing.T) {
+	// Given
+	set1 := NewWithoutValues[string]()
+	set1.AddWithoutValue("apple")
+	set1.AddWithoutValue("banana")
+	set1.AddWithoutValue("cherry")
+
+	set2 := NewWithoutValues[string]()
+	set2.AddWithoutValue("apple")
+	set2.AddWithoutValue("banana")
+	set2.AddWithoutValue("cherry")
+
+	// Expect
+	assert.True(t, set1.Equals(set2))
+
+	// When adding an already existing item
+	set1.AddWithoutValue("apple")
+	// Then the sets remain equal
+	assert.True(t, set1.Equals(set2))
+
+	// When
+	set1.AddWithoutValue("brick")
+	// Then
+	assert.False(t, set1.Equals(set2))
+
+	// When
+	set2.AddWithoutValue("brick")
+	// Then
+	assert.True(t, set1.Equals(set2))
+
+	// When
+	set2.AddWithoutValue("stone")
+	// Then
+	assert.False(t, set1.Equals(set2))
+
+	// When
+	set1.AddWithoutValue("bottle")
+	// Then
+	assert.False(t, set1.Equals(set2))
+}
+
+func TestTwoSetsWithValuesAndWithSameContentShouldBeEqual(t *testing.T) {
+	// Given
+	set1 := NewWithValues[string, string]()
+	set1.AddWithValue("apple", "red")
+	set1.AddWithValue("banana", "yellow")
+	set1.AddWithValue("cherry", "dark red")
+
+	set2 := NewWithValues[string, string]()
+	set2.AddWithValue("apple", "green")
+	set2.AddWithValue("banana", "brownish")
+	set2.AddWithValue("cherry", "glossy red")
+
+	// Expect
+	assert.True(t, set1.Equals(set2))
+
+	// When adding an already existing item
+	set1.AddWithValue("apple", "red but with a hint of green")
+	// Then the sets remain equal
+	assert.True(t, set1.Equals(set2))
+
+	// When
+	set1.AddWithValue("brick", "brick red")
+	// Then
+	assert.False(t, set1.Equals(set2))
+
+	// When
+	set2.AddWithValue("brick", "brick red with a hint of black")
+	// Then
+	assert.True(t, set1.Equals(set2))
+
+	// When
+	set2.AddWithValue("stone", "grey")
+	// Then
+	assert.False(t, set1.Equals(set2))
+
+	// When
+	set1.AddWithValue("bottle", "green")
+	// Then
+	assert.False(t, set1.Equals(set2))
+}
+
+func TestShouldBeSubset(t *testing.T) {
+	// Given
+	set1 := NewWithoutValues[string]()
+	set1.AddWithoutValue("apple")
+	set1.AddWithoutValue("banana")
+	set1.AddWithoutValue("cherry")
+
+	set2 := NewWithoutValues[string]()
+	set2.AddWithoutValue("banana")
+	set2.AddWithoutValue("cherry")
+
+	// Then
+	assert.True(t, set2.IsSubset(set1))
+	assert.False(t, set1.IsSubset(set2))
+
+	// When
+	set2.AddWithoutValue("apple")
+	// Then
+	assert.True(t, set2.IsSubset(set1))
+	assert.True(t, set1.IsSubset(set2))
+
+	// When
+	set2.AddWithoutValue("mango")
+	// Then
+	assert.False(t, set2.IsSubset(set1))
+	assert.True(t, set1.IsSubset(set2))
+
+	// When
+	set1.AddWithoutValue("brick")
+	// Then
+	assert.False(t, set2.IsSubset(set1))
+	assert.False(t, set1.IsSubset(set2))
+
+	// Expect
+	assert.False(t, set1.IsSubset(nil))
+	assert.False(t, set2.IsSubset(nil))
+
+	// Given
+	emptySet := NewWithoutValues[string]()
+	// Expect
+	assert.True(t, emptySet.IsSubset(emptySet))
+	assert.True(t, emptySet.IsSubset(nil))
+}
+
+func TestShouldGetCanonicalStringRepresentationOfSetWithoutValues(t *testing.T) {
+	// Given
+	set1 := NewWithoutValues[string]()
+	set1.AddWithoutValue("apple")
+	set1.AddWithoutValue("banana")
+	set1.AddWithoutValue("cherry")
+	// When
+	str1 := set1.String()
+	// Then
+	assert.Equal(t, 21, len(str1))
+	splitStrings := strings.Split(str1, ", ")
+	slices.Sort(splitStrings)
+	assert.Equal(t, "apple, banana, cherry", strings.Join(splitStrings, ", "))
+
+	// Given
+	set2 := NewWithoutValues[string]()
+	// When
+	str2 := set2.String()
+	// Then
+	assert.Equal(t, "", str2)
+}
+
+func TestShouldGetCanonicalStringRepresentationOfSetWithValues(t *testing.T) {
+	// Given
+	set1 := NewWithValues[string, string]()
+	set1.AddWithValue("apple", "red")
+	set1.AddWithValue("banana", "yellow")
+	set1.AddWithValue("cherry", "dark red")
+	// When
+	str1 := set1.String()
+	// Then
+	assert.Equal(t, 21, len(str1))
+	splitStrings := strings.Split(str1, ", ")
+	slices.Sort(splitStrings)
+	assert.Equal(t, "apple, banana, cherry", strings.Join(splitStrings, ", "))
+
+	// Given
+	set2 := NewWithValues[string, string]()
+	// When
+	str2 := set2.String()
+	// Then
+	assert.Equal(t, "", str2)
+}
+
+func TestStringWithValuesShouldGetStringRepresentationOfSetWithoutValues(t *testing.T) {
+	// Given
+	set1 := NewWithoutValues[string]()
+	set1.AddWithoutValue("apple")
+	set1.AddWithoutValue("banana")
+	set1.AddWithoutValue("cherry")
+	// When
+	str1 := set1.StringWithValues()
+	// Then
+	assert.Equal(t, 36, len(str1))
+	splitStrings := strings.Split(str1, ", ")
+	slices.Sort(splitStrings)
+	assert.Equal(t, "apple ({}), banana ({}), cherry ({})", strings.Join(splitStrings, ", "))
+
+	// Given
+	set2 := NewWithValues[string, string]()
+	// When
+	str2 := set2.StringWithValues()
+	// Then
+	assert.Equal(t, "", str2)
+}
+
+func TestStringWithValuesShouldGetStringRepresentationOfSetWithValues(t *testing.T) {
+	// Given
+	set1 := NewWithValues[string, string]()
+	set1.AddWithValue("apple", "red")
+	set1.AddWithValue("banana", "yellow")
+	set1.AddWithValue("cherry", "dark red")
+	// When
+	str1 := set1.StringWithValues()
+	// Then
+	assert.Equal(t, 47, len(str1))
+	splitStrings := strings.Split(str1, ", ")
+	slices.Sort(splitStrings)
+	assert.Equal(t, "apple (red), banana (yellow), cherry (dark red)", strings.Join(splitStrings, ", "))
+
+	// Given
+	set2 := NewWithValues[string, string]()
+	// When
+	str2 := set2.StringWithValues()
+	// Then
+	assert.Equal(t, "", str2)
 }
 
 func TestShouldCopySetWithoutValues(t *testing.T) {
@@ -764,102 +833,6 @@ func TestShouldUniteTwoSetsWithValues(t *testing.T) {
 	assert.Equal(t, "dark red", unitedSet2.elements["cherry"])
 }
 
-func TestShouldSubtractOneSetFromAnotherWithoutValues(t *testing.T) {
-	// Given
-	set1 := NewWithoutValues[string]()
-	set1.AddWithoutValue("apple")
-	set1.AddWithoutValue("banana")
-	set1.AddWithoutValue("cherry")
-
-	set2 := NewWithoutValues[string]()
-	set2.AddWithoutValue("banana")
-	set2.AddWithoutValue("cherry")
-	set2.AddWithoutValue("mango")
-
-	// When
-	subtractedSet := set1.Subtract(set2)
-
-	// Then
-	assert.Equal(t, 1, subtractedSet.Size())
-	assert.True(t, subtractedSet.Contains("apple"))
-	assert.False(t, subtractedSet.Contains("banana"))
-	assert.False(t, subtractedSet.Contains("cherry"))
-	assert.False(t, subtractedSet.Contains("mango"))
-
-	// and set1 and set2 remain unchanged
-	assert.Equal(t, 3, set1.Size())
-	assert.True(t, set1.Contains("apple"))
-	assert.True(t, set1.Contains("banana"))
-	assert.True(t, set1.Contains("cherry"))
-
-	assert.Equal(t, 3, set2.Size())
-	assert.True(t, set2.Contains("banana"))
-	assert.True(t, set2.Contains("cherry"))
-	assert.True(t, set2.Contains("mango"))
-
-	// When
-	subtractedSet2 := set1.Subtract(nil)
-	// Then
-	assert.Equal(t, 3, subtractedSet2.Size())
-	assert.True(t, subtractedSet2.Contains("apple"))
-	assert.True(t, subtractedSet2.Contains("banana"))
-	assert.True(t, subtractedSet2.Contains("cherry"))
-	assert.False(t, subtractedSet2.Contains("mango"))
-}
-
-func TestShouldSubtractOneSetFromAnotherWithValues(t *testing.T) {
-	// Given
-	set1 := NewWithValues[string, string]()
-	set1.AddWithValue("apple", "red")
-	set1.AddWithValue("banana", "yellow")
-	set1.AddWithValue("cherry", "dark red")
-
-	set2 := NewWithValues[string, string]()
-	set2.AddWithValue("banana", "brownish")
-	set2.AddWithValue("cherry", "glossy red")
-	set2.AddWithValue("mango", "green-orange")
-
-	// When
-	subtractedSet := set1.Subtract(set2)
-
-	// Then
-	assert.Equal(t, 1, subtractedSet.Size())
-	assert.True(t, subtractedSet.Contains("apple"))
-	assert.False(t, subtractedSet.Contains("banana"))
-	assert.False(t, subtractedSet.Contains("cherry"))
-	assert.False(t, subtractedSet.Contains("mango"))
-	assert.Equal(t, "red", subtractedSet.elements["apple"])
-
-	// and set1 and set2 remain unchanged
-	assert.Equal(t, 3, set1.Size())
-	assert.True(t, set1.Contains("apple"))
-	assert.True(t, set1.Contains("banana"))
-	assert.True(t, set1.Contains("cherry"))
-	assert.Equal(t, "red", set1.elements["apple"])
-	assert.Equal(t, "yellow", set1.elements["banana"])
-	assert.Equal(t, "dark red", set1.elements["cherry"])
-
-	assert.Equal(t, 3, set2.Size())
-	assert.True(t, set2.Contains("banana"))
-	assert.True(t, set2.Contains("cherry"))
-	assert.True(t, set2.Contains("mango"))
-	assert.Equal(t, "brownish", set2.elements["banana"])
-	assert.Equal(t, "glossy red", set2.elements["cherry"])
-	assert.Equal(t, "green-orange", set2.elements["mango"])
-
-	// When
-	subtractedSet2 := set1.Subtract(nil)
-	// Then
-	assert.Equal(t, 3, subtractedSet2.Size())
-	assert.True(t, subtractedSet2.Contains("apple"))
-	assert.True(t, subtractedSet2.Contains("banana"))
-	assert.True(t, subtractedSet2.Contains("cherry"))
-	assert.False(t, subtractedSet2.Contains("mango"))
-	assert.Equal(t, "red", subtractedSet2.elements["apple"])
-	assert.Equal(t, "yellow", subtractedSet2.elements["banana"])
-	assert.Equal(t, "dark red", subtractedSet2.elements["cherry"])
-}
-
 func TestShouldCreateDisjunctiveUnionOfTwoSetsWithoutValues(t *testing.T) {
 	// Given
 	set1 := NewWithoutValues[string]()
@@ -960,7 +933,7 @@ func TestShouldCreateDisjunctiveUnionOfTwoSetsWithValues(t *testing.T) {
 	assert.Equal(t, "", symDifferenceSet2.elements["mango"])
 }
 
-func TestShouldBeSubset(t *testing.T) {
+func TestShouldSubtractOneSetFromAnotherWithoutValues(t *testing.T) {
 	// Given
 	set1 := NewWithoutValues[string]()
 	set1.AddWithoutValue("apple")
@@ -970,38 +943,90 @@ func TestShouldBeSubset(t *testing.T) {
 	set2 := NewWithoutValues[string]()
 	set2.AddWithoutValue("banana")
 	set2.AddWithoutValue("cherry")
-
-	// Then
-	assert.True(t, set2.IsSubset(set1))
-	assert.False(t, set1.IsSubset(set2))
-
-	// When
-	set2.AddWithoutValue("apple")
-	// Then
-	assert.True(t, set2.IsSubset(set1))
-	assert.True(t, set1.IsSubset(set2))
-
-	// When
 	set2.AddWithoutValue("mango")
-	// Then
-	assert.False(t, set2.IsSubset(set1))
-	assert.True(t, set1.IsSubset(set2))
 
 	// When
-	set1.AddWithoutValue("brick")
+	subtractedSet := set1.Subtract(set2)
+
 	// Then
-	assert.False(t, set2.IsSubset(set1))
-	assert.False(t, set1.IsSubset(set2))
+	assert.Equal(t, 1, subtractedSet.Size())
+	assert.True(t, subtractedSet.Contains("apple"))
+	assert.False(t, subtractedSet.Contains("banana"))
+	assert.False(t, subtractedSet.Contains("cherry"))
+	assert.False(t, subtractedSet.Contains("mango"))
 
-	// Expect
-	assert.False(t, set1.IsSubset(nil))
-	assert.False(t, set2.IsSubset(nil))
+	// and set1 and set2 remain unchanged
+	assert.Equal(t, 3, set1.Size())
+	assert.True(t, set1.Contains("apple"))
+	assert.True(t, set1.Contains("banana"))
+	assert.True(t, set1.Contains("cherry"))
 
+	assert.Equal(t, 3, set2.Size())
+	assert.True(t, set2.Contains("banana"))
+	assert.True(t, set2.Contains("cherry"))
+	assert.True(t, set2.Contains("mango"))
+
+	// When
+	subtractedSet2 := set1.Subtract(nil)
+	// Then
+	assert.Equal(t, 3, subtractedSet2.Size())
+	assert.True(t, subtractedSet2.Contains("apple"))
+	assert.True(t, subtractedSet2.Contains("banana"))
+	assert.True(t, subtractedSet2.Contains("cherry"))
+	assert.False(t, subtractedSet2.Contains("mango"))
+}
+
+func TestShouldSubtractOneSetFromAnotherWithValues(t *testing.T) {
 	// Given
-	emptySet := NewWithoutValues[string]()
-	// Expect
-	assert.True(t, emptySet.IsSubset(emptySet))
-	assert.True(t, emptySet.IsSubset(nil))
+	set1 := NewWithValues[string, string]()
+	set1.AddWithValue("apple", "red")
+	set1.AddWithValue("banana", "yellow")
+	set1.AddWithValue("cherry", "dark red")
+
+	set2 := NewWithValues[string, string]()
+	set2.AddWithValue("banana", "brownish")
+	set2.AddWithValue("cherry", "glossy red")
+	set2.AddWithValue("mango", "green-orange")
+
+	// When
+	subtractedSet := set1.Subtract(set2)
+
+	// Then
+	assert.Equal(t, 1, subtractedSet.Size())
+	assert.True(t, subtractedSet.Contains("apple"))
+	assert.False(t, subtractedSet.Contains("banana"))
+	assert.False(t, subtractedSet.Contains("cherry"))
+	assert.False(t, subtractedSet.Contains("mango"))
+	assert.Equal(t, "red", subtractedSet.elements["apple"])
+
+	// and set1 and set2 remain unchanged
+	assert.Equal(t, 3, set1.Size())
+	assert.True(t, set1.Contains("apple"))
+	assert.True(t, set1.Contains("banana"))
+	assert.True(t, set1.Contains("cherry"))
+	assert.Equal(t, "red", set1.elements["apple"])
+	assert.Equal(t, "yellow", set1.elements["banana"])
+	assert.Equal(t, "dark red", set1.elements["cherry"])
+
+	assert.Equal(t, 3, set2.Size())
+	assert.True(t, set2.Contains("banana"))
+	assert.True(t, set2.Contains("cherry"))
+	assert.True(t, set2.Contains("mango"))
+	assert.Equal(t, "brownish", set2.elements["banana"])
+	assert.Equal(t, "glossy red", set2.elements["cherry"])
+	assert.Equal(t, "green-orange", set2.elements["mango"])
+
+	// When
+	subtractedSet2 := set1.Subtract(nil)
+	// Then
+	assert.Equal(t, 3, subtractedSet2.Size())
+	assert.True(t, subtractedSet2.Contains("apple"))
+	assert.True(t, subtractedSet2.Contains("banana"))
+	assert.True(t, subtractedSet2.Contains("cherry"))
+	assert.False(t, subtractedSet2.Contains("mango"))
+	assert.Equal(t, "red", subtractedSet2.elements["apple"])
+	assert.Equal(t, "yellow", subtractedSet2.elements["banana"])
+	assert.Equal(t, "dark red", subtractedSet2.elements["cherry"])
 }
 
 func TestShouldFilterSetWithoutValues(t *testing.T) {
