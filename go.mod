@@ -1,4 +1,4 @@
-module github.com/tztz/libs/go/gocollection
+module github.com/tztz/gocollection
 
 go 1.23.1
 
