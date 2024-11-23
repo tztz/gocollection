@@ -24,7 +24,7 @@ intersectedSet := set1.Intersect(set2)
 
 // Result
 fmt.Println(intersectedSet.Size()) // 2
-fmt.Println(intersectedSet.List()) // [apple banana]
+fmt.Println(intersectedSet.List()) // [banana apple]
 ```
 
 Todo: more doc to come ...
