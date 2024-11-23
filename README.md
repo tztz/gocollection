@@ -60,15 +60,6 @@ fmt.Println(intersectedSet.Size()) // 0
 
 ## Methods
 
-### Creating new set
-
-- Copy
-- Intersect
-- Unite
-- UniteDisjunctively
-- Subtract
-- Filter
-
 ### Operating on same set
 
 - AddWithValue
@@ -87,3 +78,12 @@ fmt.Println(intersectedSet.Size()) // 0
 - IsSubset
 - String
 - StringWithValues
+
+### Creating new set
+
+- Copy
+- Intersect
+- Unite
+- UniteDisjunctively
+- Subtract
+- Filter

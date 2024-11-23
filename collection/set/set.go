@@ -53,18 +53,39 @@ func (s *Set[T, V]) Remove(element T) {
 	delete(s.elements, element)
 }
 
+// AddAll adds all elements (including the value) from otherSet to this set.
+// If otherSet is nil, nothing happens.
+// If an element already exists in this set, the value is overwritten with the value from otherSet.
+// The otherSet remains unchanged.
+func (s *Set[T, V]) AddAll(otherSet *Set[T, V]) {
+	if otherSet == nil {
+		return
+	}
+	for elem, value := range otherSet.elements {
+		s.elements[elem] = value
+	}
+}
+
+// RemoveAll removes all elements from otherSet from this set.
+// If otherSet is nil, nothing happens.
+// The otherSet remains unchanged.
+func (s *Set[T, V]) RemoveAll(otherSet *Set[T, V]) {
+	if otherSet == nil {
+		return
+	}
+	for elem := range otherSet.elements {
+		delete(s.elements, elem)
+	}
+}
+
+// Clear removes all elements from the set.
+func (s *Set[T, V]) Clear() {
+	s.elements = createNewWithValues[T, V]()
+}
+
 // Size returns the number of elements in the set.
 func (s *Set[T, V]) Size() int {
 	return len(s.elements)
-}
-
-// Contains checks whether or not the given element exists in the set (ignoring the value).
-// Returns true if the element is in the set, false otherwise.
-// The value associated with the element is not considered, i.e. it doesn't matter whether
-// the given element's value is different from the element's value in this set.
-func (s *Set[T, V]) Contains(element T) bool {
-	_, exists := s.elements[element]
-	return exists
 }
 
 // List returns all elements (without values) of the set as a slice.
@@ -77,9 +98,50 @@ func (s *Set[T, V]) List() []T {
 	return elements
 }
 
-// Clear removes all elements from the set.
-func (s *Set[T, V]) Clear() {
-	s.elements = createNewWithValues[T, V]()
+// Contains checks whether or not the given element exists in the set (ignoring the value).
+// Returns true if the element is in the set, false otherwise.
+// The value associated with the element is not considered, i.e. it doesn't matter whether
+// the given element's value is different from the element's value in this set.
+func (s *Set[T, V]) Contains(element T) bool {
+	_, exists := s.elements[element]
+	return exists
+}
+
+// Equals checks if this set is equal to otherSet ignoring the values.
+// Returns true if both sets are of equal size and contain the same elements (ignoring the values), false otherwise.
+func (s *Set[T, V]) Equals(otherSet *Set[T, V]) bool {
+	if s.Size() != otherSet.Size() {
+		return false
+	}
+	for elem := range s.elements {
+		if !otherSet.Contains(elem) {
+			return false
+		}
+	}
+	return true
+}
+
+// IsSubset checks if this set is a subset of otherSet.
+// Returns true if all elements of this set are in otherSet, false otherwise.
+// If otherSet is nil and this set is not empty, false is returned.
+// If otherSet is nil and this set is empty, true is returned.
+// The values are not considered when checking for subset.
+func (s *Set[T, V]) IsSubset(otherSet *Set[T, V]) bool {
+	if otherSet == nil && s.Size() > 0 {
+		return false
+	}
+	if otherSet == nil && s.Size() == 0 {
+		return true
+	}
+	if s.Size() > otherSet.Size() {
+		return false
+	}
+	for elem := range s.elements {
+		if !otherSet.Contains(elem) {
+			return false
+		}
+	}
+	return true
 }
 
 // String returns a string representation of the set.
@@ -108,45 +170,6 @@ func (s *Set[T, V]) StringWithValues() string {
 		strElems = append(strElems, fmt.Sprintf("%v (%v)", elem, value))
 	}
 	return strings.Join(strElems, ", ")
-}
-
-// Equals checks if this set is equal to otherSet ignoring the values.
-// Returns true if both sets are of equal size and contain the same elements (ignoring the values), false otherwise.
-func (s *Set[T, V]) Equals(otherSet *Set[T, V]) bool {
-	if s.Size() != otherSet.Size() {
-		return false
-	}
-	for elem := range s.elements {
-		if !otherSet.Contains(elem) {
-			return false
-		}
-	}
-	return true
-}
-
-// AddAll adds all elements (including the value) from otherSet to this set.
-// If otherSet is nil, nothing happens.
-// If an element already exists in this set, the value is overwritten with the value from otherSet.
-// The otherSet remains unchanged.
-func (s *Set[T, V]) AddAll(otherSet *Set[T, V]) {
-	if otherSet == nil {
-		return
-	}
-	for elem, value := range otherSet.elements {
-		s.elements[elem] = value
-	}
-}
-
-// RemoveAll removes all elements from otherSet from this set.
-// If otherSet is nil, nothing happens.
-// The otherSet remains unchanged.
-func (s *Set[T, V]) RemoveAll(otherSet *Set[T, V]) {
-	if otherSet == nil {
-		return
-	}
-	for elem := range otherSet.elements {
-		delete(s.elements, elem)
-	}
 }
 
 // Copy returns a new set containing all elements (including the values) of this set.
@@ -186,24 +209,6 @@ func (s *Set[T, V]) Unite(otherSet *Set[T, V]) *Set[T, V] {
 	return newSet
 }
 
-// Subtract returns a new set containing all elements (including the values) that are in this set but not in otherSet.
-// If otherSet is nil, a new set containing all elements of this set is returned.
-// Neither this set nor otherSet are changed.
-// The values are not considered when creating the subtraction.
-func (s *Set[T, V]) Subtract(otherSet *Set[T, V]) *Set[T, V] {
-	newSet := NewWithValues[T, V]()
-	if otherSet == nil {
-		newSet.AddAll(s)
-		return newSet
-	}
-	for elem, value := range s.elements {
-		if !otherSet.Contains(elem) {
-			newSet.AddWithValue(elem, value)
-		}
-	}
-	return newSet
-}
-
 // UniteDisjunctively returns a new set containing all elements (including the values) that are in either this set or otherSet, but not in both (symmetric difference).
 // If otherSet is nil, a new set containing all elements of this set is returned.
 // Neither this set nor otherSet are changed.
@@ -227,27 +232,22 @@ func (s *Set[T, V]) UniteDisjunctively(otherSet *Set[T, V]) *Set[T, V] {
 	return newSet
 }
 
-// IsSubset checks if this set is a subset of otherSet.
-// Returns true if all elements of this set are in otherSet, false otherwise.
-// If otherSet is nil and this set is not empty, false is returned.
-// If otherSet is nil and this set is empty, true is returned.
-// The values are not considered when checking for subset.
-func (s *Set[T, V]) IsSubset(otherSet *Set[T, V]) bool {
-	if otherSet == nil && s.Size() > 0 {
-		return false
+// Subtract returns a new set containing all elements (including the values) that are in this set but not in otherSet.
+// If otherSet is nil, a new set containing all elements of this set is returned.
+// Neither this set nor otherSet are changed.
+// The values are not considered when creating the subtraction.
+func (s *Set[T, V]) Subtract(otherSet *Set[T, V]) *Set[T, V] {
+	newSet := NewWithValues[T, V]()
+	if otherSet == nil {
+		newSet.AddAll(s)
+		return newSet
 	}
-	if otherSet == nil && s.Size() == 0 {
-		return true
-	}
-	if s.Size() > otherSet.Size() {
-		return false
-	}
-	for elem := range s.elements {
+	for elem, value := range s.elements {
 		if !otherSet.Contains(elem) {
-			return false
+			newSet.AddWithValue(elem, value)
 		}
 	}
-	return true
+	return newSet
 }
 
 // Filter returns a new set containing only elements (including the values) for which the filter function returns true.
