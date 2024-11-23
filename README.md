@@ -39,8 +39,8 @@ set2.Remove("brick")
 intersectedSet := set1.Intersect(set2)
 
 // Filter set
-filteredSet := intersectedSet.Filter(func(elem string) bool {
-    return strings.Contains(elem, "a")
+filteredSet := set1.Filter(func(elem string) bool {
+    return strings.Contains(elem, "c")
 })
 
 fmt.Println(intersectedSet.Size())             // 2
@@ -50,7 +50,7 @@ fmt.Println(intersectedSet)                    // banana, apple
 fmt.Println(intersectedSet.StringWithValues()) // apple (green), banana (brownish)
 fmt.Println(set1.Equals(set2))                 // false
 fmt.Println(intersectedSet.IsSubset(set1))     // true
-fmt.Println(filteredSet)                       // apple, banana
+fmt.Println(filteredSet)                       // cherry, brick
 
 // Clear set
 intersectedSet.Clear()
