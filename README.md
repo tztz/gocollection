@@ -58,9 +58,9 @@ intersectedSet.Clear()
 fmt.Println(intersectedSet.Size()) // 0
 ```
 
-## Methods
+### Methods
 
-### Operating on same set
+#### Operating on same set
 
 - AddWithValue
 - AddWithoutValue
@@ -69,7 +69,7 @@ fmt.Println(intersectedSet.Size()) // 0
 - RemoveAll
 - Clear
 
-### Informative
+#### Informative
 
 - Size
 - List
@@ -79,7 +79,7 @@ fmt.Println(intersectedSet.Size()) // 0
 - String
 - StringWithValues
 
-### Creating new set
+#### Creating new set
 
 - Copy
 - Intersect
