@@ -146,12 +146,28 @@ func TestShouldRemoveItemFromSet(t *testing.T) {
 	assert.False(t, set.Contains("apple"))
 	assert.True(t, set.Contains("banana"))
 
+	// When removing non-existing element
+	set.Remove("brick")
+	// Then nothing changes
+	assert.Equal(t, 1, set.Size())
+	assert.False(t, set.Contains("apple"))
+	assert.True(t, set.Contains("banana"))
+	assert.False(t, set.Contains("brick"))
+
 	// When
 	set.Remove("banana")
 	// Then
 	assert.Equal(t, 0, set.Size())
 	assert.False(t, set.Contains("apple"))
 	assert.False(t, set.Contains("banana"))
+
+	// When removing non-existing element
+	set.Remove("brick")
+	// Then nothing changes
+	assert.Equal(t, 0, set.Size())
+	assert.False(t, set.Contains("apple"))
+	assert.False(t, set.Contains("banana"))
+	assert.False(t, set.Contains("brick"))
 }
 
 func TestShouldAddAllGivenItemsWithoutValuesToSet(t *testing.T) {
@@ -277,6 +293,20 @@ func TestShouldRemoveAllGivenItemsFromSet(t *testing.T) {
 	assert.False(t, set1.Contains("banana"))
 	assert.False(t, set1.Contains("cherry"))
 	assert.False(t, set1.Contains("mango"))
+
+	// When removing non-existing elements
+	setOfAliens := NewWithoutValues[string]()
+	setOfAliens.AddWithoutValue("alien1")
+	setOfAliens.AddWithoutValue("alien2")
+	set1.RemoveAll(setOfAliens)
+	// Then nothing changes
+	assert.Equal(t, 1, set1.Size())
+	assert.True(t, set1.Contains("apple"))
+	assert.False(t, set1.Contains("banana"))
+	assert.False(t, set1.Contains("cherry"))
+	assert.False(t, set1.Contains("mango"))
+	assert.False(t, set1.Contains("alien1"))
+	assert.False(t, set1.Contains("alien2"))
 }
 
 func TestShouldClearSet(t *testing.T) {
@@ -675,6 +705,20 @@ func TestShouldIntersectTwoSetsWithoutValues(t *testing.T) {
 	assert.False(t, intersectedSet2.Contains("banana"))
 	assert.False(t, intersectedSet2.Contains("cherry"))
 	assert.False(t, intersectedSet2.Contains("mango"))
+
+	// When intersecting with aliens
+	setOfAliens := NewWithoutValues[string]()
+	setOfAliens.AddWithoutValue("alien1")
+	setOfAliens.AddWithoutValue("alien2")
+	intersectedSet3 := set1.Intersect(setOfAliens)
+	// Then the intersection is empty
+	assert.Equal(t, 0, intersectedSet3.Size())
+	assert.False(t, intersectedSet3.Contains("apple"))
+	assert.False(t, intersectedSet3.Contains("banana"))
+	assert.False(t, intersectedSet3.Contains("cherry"))
+	assert.False(t, intersectedSet3.Contains("mango"))
+	assert.False(t, intersectedSet3.Contains("alien1"))
+	assert.False(t, intersectedSet3.Contains("alien2"))
 }
 
 func TestShouldIntersectTwoSetsWithValues(t *testing.T) {
@@ -974,6 +1018,20 @@ func TestShouldSubtractOneSetFromAnotherWithoutValues(t *testing.T) {
 	assert.True(t, subtractedSet2.Contains("banana"))
 	assert.True(t, subtractedSet2.Contains("cherry"))
 	assert.False(t, subtractedSet2.Contains("mango"))
+
+	// When subtracting non-existing elements
+	setOfAliens := NewWithoutValues[string]()
+	setOfAliens.AddWithoutValue("alien1")
+	setOfAliens.AddWithoutValue("alien2")
+	subtractedSet3 := set1.Subtract(setOfAliens)
+	// Then nothing changes
+	assert.Equal(t, 3, subtractedSet3.Size())
+	assert.True(t, subtractedSet3.Contains("apple"))
+	assert.True(t, subtractedSet3.Contains("banana"))
+	assert.True(t, subtractedSet3.Contains("cherry"))
+	assert.False(t, subtractedSet3.Contains("mango"))
+	assert.False(t, subtractedSet3.Contains("alien1"))
+	assert.False(t, subtractedSet3.Contains("alien2"))
 }
 
 func TestShouldSubtractOneSetFromAnotherWithValues(t *testing.T) {

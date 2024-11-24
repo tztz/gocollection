@@ -9,7 +9,7 @@ import (
 type internalEmptyType struct{}
 type FilterFunc[T comparable] func(T) bool
 
-// A Set is a collection of unique elements having the same type T.
+// Set is a collection of unique elements having the same type T.
 // Values of type V can be associated with the elements - but don't have to.
 // A Set is actually a map[T]V with keys of type T and values of type V, where the values are just associated data.
 // If you don't need values, you can omit them in the Set to save memory. Then it's just a set of elements like a set of labels.
@@ -37,7 +37,7 @@ func createNewWithValues[T comparable, V any]() map[T]V {
 	return make(map[T]V)
 }
 
-// Add adds an element with an associated value to the set.
+// AddWithValue adds an element with an associated value to the set.
 func (s *Set[T, V]) AddWithValue(element T, value V) {
 	s.elements[element] = value
 }
