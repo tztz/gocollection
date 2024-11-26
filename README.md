@@ -11,7 +11,7 @@ An API to handle sets providing methods from set theory.
 - A `Set` is a collection of unique elements having the same type `T`.
 - Values of type `V` can be associated with the elements - but don't have to.
 - A `Set` is actually a `map[T]V` with keys of type `T` and values of type `V`, where the values are just associated data.
-- If you don't need values, you can omit them in the `Set` to save memory. Then it's just a set of elements like a set of labels.
+- If you don't need values, you can omit them in the `Set` to save memory. Then it's just a set of elements (like a set of labels).
 - A `Set` can, of course, be empty.
 - The zero value of a `Set` is an empty set.
 
@@ -62,6 +62,7 @@ fmt.Println(intersectedSet.Size()) // 0
 
 #### Operating on same set
 
+- GetElements
 - AddWithValue
 - AddWithoutValue
 - Remove
@@ -87,3 +88,7 @@ fmt.Println(intersectedSet.Size()) // 0
 - UniteDisjunctively
 - Subtract
 - Filter
+
+#### Random
+
+- OneR
