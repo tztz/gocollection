@@ -35,7 +35,7 @@ func main() {
 
 	// Map set
 	mappedSet := set1.Map(func(elem string, value string) (string, string) {
-		return strings.ToUpper(elem), strings.ToUpper(value)
+		return strings.ToUpper(elem), fmt.Sprintf("color: %v", strings.ToUpper(value))
 	})
 
 	// One random element
@@ -51,6 +51,7 @@ func main() {
 	fmt.Println(intersectedSet.IsSubset(set1))                // true
 	fmt.Println(filteredSet)                                  // cherry, brick
 	fmt.Println(mappedSet)                                    // APPLE, BANANA, CHERRY, BRICK
+	fmt.Println(mappedSet.StringWithValues())                 // APPLE (color: RED), BANANA (color: YELLOW), CHERRY (color: DARK RED), BRICK (color: RED)
 	fmt.Printf("elem: %v, value: %v\n", rndElement, rndValue) // elem: banana, value: yellow
 
 	// Clear set
