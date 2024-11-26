@@ -327,7 +327,7 @@ func (s *tzSet[T, V]) Filter(filterFunc FilterFunc[T, V]) Set[T, V] {
 }
 
 // Map returns a new set containing all elements (including the values) returned by the map function which is applied to each element of this set.
-// If the map function is nil, a copy of this set is returned (all elements are included because no mapping function is considered like an identity function).
+// If the map function is nil, a copy of this set is returned (all elements are included because having no mapping function behaves like identity mapping).
 // This set remains unchanged.
 func (s *tzSet[T, V]) Map(mapFunc MapFunc[T, V]) Set[T, V] {
 	if mapFunc == nil {

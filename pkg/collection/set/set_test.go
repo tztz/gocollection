@@ -1295,13 +1295,13 @@ func TestShouldFilterSetWithValues(t *testing.T) {
 
 func TestShouldMapSetWithoutValues(t *testing.T) {
 	// Given
-	set1 := NewWithoutValues[string]()
-	set1.AddWithoutValue("apple")
-	set1.AddWithoutValue("banana")
-	set1.AddWithoutValue("cherry")
+	set := NewWithoutValues[string]()
+	set.AddWithoutValue("apple")
+	set.AddWithoutValue("banana")
+	set.AddWithoutValue("cherry")
 
 	// When
-	mappedSet1 := set1.Map(func(elem string, value InternalEmptyType) (string, InternalEmptyType) {
+	mappedSet1 := set.Map(func(elem string, value InternalEmptyType) (string, InternalEmptyType) {
 		return elem + " fruit", internalEmptyValue
 	})
 
@@ -1316,17 +1316,29 @@ func TestShouldMapSetWithoutValues(t *testing.T) {
 	assert.Equal(t, internalEmptyValue, mappedSet1.GetElements()["apple fruit"])
 	assert.Equal(t, internalEmptyValue, mappedSet1.GetElements()["banana fruit"])
 	assert.Equal(t, internalEmptyValue, mappedSet1.GetElements()["cherry fruit"])
+
+	// When the map function is nil
+	mappedSet2 := set.Map(nil)
+
+	// Then all elements are included (b/c having no mapping function behaves like identity mapping)
+	assert.Equal(t, 3, mappedSet2.Size())
+	assert.True(t, mappedSet2.Contains("apple"))
+	assert.True(t, mappedSet2.Contains("banana"))
+	assert.True(t, mappedSet2.Contains("cherry"))
+	assert.False(t, mappedSet2.Contains("apple fruit"))
+	assert.False(t, mappedSet2.Contains("banana fruit"))
+	assert.False(t, mappedSet2.Contains("cherry fruit"))
 }
 
 func TestShouldMapSetWithValues(t *testing.T) {
 	// Given
-	set1 := NewWithValues[string, string]()
-	set1.AddWithValue("apple", "red")
-	set1.AddWithValue("banana", "yellow")
-	set1.AddWithValue("cherry", "dark red")
+	set := NewWithValues[string, string]()
+	set.AddWithValue("apple", "red")
+	set.AddWithValue("banana", "yellow")
+	set.AddWithValue("cherry", "dark red")
 
 	// When
-	mappedSet1 := set1.Map(func(elem string, value string) (string, string) {
+	mappedSet1 := set.Map(func(elem string, value string) (string, string) {
 		return elem + " fruit", value + " color"
 	})
 
@@ -1341,6 +1353,21 @@ func TestShouldMapSetWithValues(t *testing.T) {
 	assert.Equal(t, "red color", mappedSet1.GetElements()["apple fruit"])
 	assert.Equal(t, "yellow color", mappedSet1.GetElements()["banana fruit"])
 	assert.Equal(t, "dark red color", mappedSet1.GetElements()["cherry fruit"])
+
+	// When the map function is nil
+	mappedSet2 := set.Map(nil)
+
+	// Then all elements are included (b/c having no mapping function behaves like identity mapping)
+	assert.Equal(t, 3, mappedSet2.Size())
+	assert.True(t, mappedSet2.Contains("apple"))
+	assert.True(t, mappedSet2.Contains("banana"))
+	assert.True(t, mappedSet2.Contains("cherry"))
+	assert.False(t, mappedSet2.Contains("apple fruit"))
+	assert.False(t, mappedSet2.Contains("banana fruit"))
+	assert.False(t, mappedSet2.Contains("cherry fruit"))
+	assert.Equal(t, "red", mappedSet2.GetElements()["apple"])
+	assert.Equal(t, "yellow", mappedSet2.GetElements()["banana"])
+	assert.Equal(t, "dark red", mappedSet2.GetElements()["cherry"])
 }
 
 func TestShouldGetOneRandomElementFromSet(t *testing.T) {
