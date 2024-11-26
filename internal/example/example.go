@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tztz/gocollection/collection/set"
+	"github.com/tztz/gocollection/pkg/collection/set"
 )
 
 func main() {
