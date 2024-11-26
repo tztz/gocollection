@@ -45,7 +45,7 @@ func example() {
 	fmt.Println(intersectedSet.Size())                        // 2
 	fmt.Println(intersectedSet.Contains("banana"))            // true
 	fmt.Println(intersectedSet.List())                        // [apple banana]
-	fmt.Println(intersectedSet)                               // apple, banana
+	fmt.Println(intersectedSet)                               // banana, apple
 	fmt.Println(intersectedSet.StringWithValues())            // banana (brownish), apple (green)
 	fmt.Println(set1.Equals(set2))                            // false
 	fmt.Println(intersectedSet.IsSubset(set1))                // true
