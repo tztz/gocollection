@@ -7,7 +7,7 @@ import (
 	"github.com/tztz/gocollection/pkg/collection/set"
 )
 
-func main() {
+func example() {
 	// First set
 	set1 := set.NewWithValues[string, string]()
 	set1.AddWithValue("apple", "red")
@@ -58,4 +58,8 @@ func main() {
 	intersectedSet.Clear()
 
 	fmt.Println(intersectedSet.Size()) // 0
+}
+
+func main() {
+	example()
 }

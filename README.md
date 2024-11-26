@@ -15,17 +15,17 @@ An API to handle sets providing methods from set theory.
 - A `Set` can, of course, be empty.
 - The zero value of a `Set` is an empty set.
 
-Example
+### Example
 
 ```go
-// First set
+// First set, add elements
 set1 := set.NewWithValues[string, string]()
 set1.AddWithValue("apple", "red")
 set1.AddWithValue("banana", "yellow")
 set1.AddWithValue("cherry", "dark red")
 set1.AddWithValue("brick", "red")
 
-// Second set
+// Second set, add elements
 set2 := set.NewWithValues[string, string]()
 set2.AddWithValue("apple", "green")
 set2.AddWithValue("banana", "brownish")
@@ -38,25 +38,10 @@ set2.Remove("brick")
 // Calculate intersection
 intersectedSet := set1.Intersect(set2)
 
-// Filter set
-filteredSet := set1.Filter(func(elem string) bool {
-    return strings.Contains(elem, "c")
-})
-
-fmt.Println(intersectedSet.Size())             // 2
-fmt.Println(intersectedSet.Contains("banana")) // true
-fmt.Println(intersectedSet.List())             // [banana apple]
-fmt.Println(intersectedSet)                    // banana, apple
-fmt.Println(intersectedSet.StringWithValues()) // apple (green), banana (brownish)
-fmt.Println(set1.Equals(set2))                 // false
-fmt.Println(intersectedSet.IsSubset(set1))     // true
-fmt.Println(filteredSet)                       // cherry, brick
-
-// Clear set
-intersectedSet.Clear()
-
-fmt.Println(intersectedSet.Size()) // 0
+fmt.Println(intersectedSet.List()) // [banana apple]
 ```
+
+For more examples have a look at the [example.go](/internal/example/example.go) file.
 
 ### Methods
 
