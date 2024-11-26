@@ -1199,18 +1199,18 @@ func TestShouldFilterSetWithoutValues(t *testing.T) {
 	set.AddWithoutValue("pear")
 
 	// When
-	filteredSet := set.Filter(func(elem string) bool {
+	filteredSet1 := set.Filter(func(elem string, value InternalEmptyType) bool {
 		return strings.Contains(elem, "an")
 	})
 
 	// Then
-	assert.Equal(t, 3, filteredSet.Size())
-	assert.True(t, filteredSet.Contains("banana"))
-	assert.True(t, filteredSet.Contains("mango"))
-	assert.True(t, filteredSet.Contains("orange"))
-	assert.False(t, filteredSet.Contains("apple"))
-	assert.False(t, filteredSet.Contains("cherry"))
-	assert.False(t, filteredSet.Contains("pear"))
+	assert.Equal(t, 3, filteredSet1.Size())
+	assert.True(t, filteredSet1.Contains("banana"))
+	assert.True(t, filteredSet1.Contains("mango"))
+	assert.True(t, filteredSet1.Contains("orange"))
+	assert.False(t, filteredSet1.Contains("apple"))
+	assert.False(t, filteredSet1.Contains("cherry"))
+	assert.False(t, filteredSet1.Contains("pear"))
 
 	// When the filter function is nil
 	filteredSet2 := set.Filter(nil)
@@ -1235,41 +1235,62 @@ func TestShouldFilterSetWithValues(t *testing.T) {
 	set.AddWithValue("pear", "green")
 
 	// When
-	filteredSet := set.Filter(func(elem string) bool {
+	filteredSet1 := set.Filter(func(elem string, value string) bool {
 		return strings.Contains(elem, "an")
 	})
 
 	// Then
-	assert.Equal(t, 3, filteredSet.Size())
-	assert.True(t, filteredSet.Contains("banana"))
-	assert.True(t, filteredSet.Contains("mango"))
-	assert.True(t, filteredSet.Contains("orange"))
-	assert.False(t, filteredSet.Contains("apple"))
-	assert.False(t, filteredSet.Contains("cherry"))
-	assert.False(t, filteredSet.Contains("pear"))
-	assert.Equal(t, "yellow", filteredSet.GetElements()["banana"])
-	assert.Equal(t, "green-orange", filteredSet.GetElements()["mango"])
-	assert.Equal(t, "orange", filteredSet.GetElements()["orange"])
-	assert.Equal(t, "", filteredSet.GetElements()["apple"])
-	assert.Equal(t, "", filteredSet.GetElements()["cherry"])
-	assert.Equal(t, "", filteredSet.GetElements()["pear"])
+	assert.Equal(t, 3, filteredSet1.Size())
+	assert.True(t, filteredSet1.Contains("banana"))
+	assert.True(t, filteredSet1.Contains("mango"))
+	assert.True(t, filteredSet1.Contains("orange"))
+	assert.False(t, filteredSet1.Contains("apple"))
+	assert.False(t, filteredSet1.Contains("cherry"))
+	assert.False(t, filteredSet1.Contains("pear"))
+	assert.Equal(t, "yellow", filteredSet1.GetElements()["banana"])
+	assert.Equal(t, "green-orange", filteredSet1.GetElements()["mango"])
+	assert.Equal(t, "orange", filteredSet1.GetElements()["orange"])
+	assert.Equal(t, "", filteredSet1.GetElements()["apple"])
+	assert.Equal(t, "", filteredSet1.GetElements()["cherry"])
+	assert.Equal(t, "", filteredSet1.GetElements()["pear"])
 
-	// When the filter function is nil
-	filteredSet2 := set.Filter(nil)
-	// Then all elements are included (b/c there is no filter)
-	assert.Equal(t, 6, filteredSet2.Size())
-	assert.True(t, filteredSet2.Contains("apple"))
-	assert.True(t, filteredSet2.Contains("banana"))
-	assert.True(t, filteredSet2.Contains("cherry"))
+	// When
+	filteredSet2 := set.Filter(func(elem string, value string) bool {
+		return strings.Contains(elem, "an") && strings.Contains(value, "orange")
+	})
+
+	// Then
+	assert.Equal(t, 2, filteredSet2.Size())
 	assert.True(t, filteredSet2.Contains("mango"))
 	assert.True(t, filteredSet2.Contains("orange"))
-	assert.True(t, filteredSet2.Contains("pear"))
-	assert.Equal(t, "red", filteredSet2.GetElements()["apple"])
-	assert.Equal(t, "yellow", filteredSet2.GetElements()["banana"])
-	assert.Equal(t, "dark red", filteredSet2.GetElements()["cherry"])
+	assert.False(t, filteredSet2.Contains("banana"))
+	assert.False(t, filteredSet2.Contains("apple"))
+	assert.False(t, filteredSet2.Contains("cherry"))
+	assert.False(t, filteredSet2.Contains("pear"))
 	assert.Equal(t, "green-orange", filteredSet2.GetElements()["mango"])
 	assert.Equal(t, "orange", filteredSet2.GetElements()["orange"])
-	assert.Equal(t, "green", filteredSet2.GetElements()["pear"])
+	assert.Equal(t, "", filteredSet2.GetElements()["banana"])
+	assert.Equal(t, "", filteredSet2.GetElements()["apple"])
+	assert.Equal(t, "", filteredSet2.GetElements()["cherry"])
+	assert.Equal(t, "", filteredSet2.GetElements()["pear"])
+
+	// When the filter function is nil
+	filteredSet3 := set.Filter(nil)
+
+	// Then all elements are included (b/c there is no filter)
+	assert.Equal(t, 6, filteredSet3.Size())
+	assert.True(t, filteredSet3.Contains("apple"))
+	assert.True(t, filteredSet3.Contains("banana"))
+	assert.True(t, filteredSet3.Contains("cherry"))
+	assert.True(t, filteredSet3.Contains("mango"))
+	assert.True(t, filteredSet3.Contains("orange"))
+	assert.True(t, filteredSet3.Contains("pear"))
+	assert.Equal(t, "red", filteredSet3.GetElements()["apple"])
+	assert.Equal(t, "yellow", filteredSet3.GetElements()["banana"])
+	assert.Equal(t, "dark red", filteredSet3.GetElements()["cherry"])
+	assert.Equal(t, "green-orange", filteredSet3.GetElements()["mango"])
+	assert.Equal(t, "orange", filteredSet3.GetElements()["orange"])
+	assert.Equal(t, "green", filteredSet3.GetElements()["pear"])
 }
 
 func TestShouldGetOneRandomElementFromSet(t *testing.T) {
@@ -1317,5 +1338,5 @@ func TestShouldGetOneRandomElementFromSet(t *testing.T) {
 	assert.Equal(t, "", randomElement3)
 	assert.Equal(t, internalEmptyValue, randomValue3)
 	assert.NotNil(t, err3)
-	assert.Equal(t, fmt.Errorf("cannot get a random element from set because it is empty"), err3)
+	assert.Equal(t, fmt.Errorf("cannot get a random element from set, set is empty"), err3)
 }

@@ -8,8 +8,9 @@ import (
 	"strings"
 )
 
-type internalEmptyType struct{}
-type FilterFunc[T comparable] func(T) bool
+type InternalEmptyType struct{}
+
+type FilterFunc[T comparable, V any] func(T, V) bool
 
 // Set is a collection of unique elements having the same type T.
 // Values of type V can be associated with the elements - but don't have to.
@@ -46,7 +47,7 @@ type Set[T comparable, V any] interface {
 	Unite(Set[T, V]) Set[T, V]
 	UniteDisjunctively(Set[T, V]) Set[T, V]
 	Subtract(Set[T, V]) Set[T, V]
-	Filter(FilterFunc[T]) Set[T, V]
+	Filter(FilterFunc[T, V]) Set[T, V]
 
 	OneR() (T, V, error)
 }
@@ -55,7 +56,7 @@ type tzSet[T comparable, V any] struct {
 	elements map[T]V
 }
 
-var internalEmptyValue = internalEmptyType{}
+var internalEmptyValue = InternalEmptyType{}
 
 // NewWithValues creates a new, empty set that can contain elements of type T having values of type V (like a map).
 func NewWithValues[T comparable, V any]() Set[T, V] {
@@ -65,9 +66,9 @@ func NewWithValues[T comparable, V any]() Set[T, V] {
 }
 
 // NewWithoutValues creates a new, empty set that can contain elements of type T (like a set of labels).
-func NewWithoutValues[T comparable]() Set[T, internalEmptyType] {
-	return &tzSet[T, internalEmptyType]{
-		elements: createNewWithValues[T, internalEmptyType](),
+func NewWithoutValues[T comparable]() Set[T, InternalEmptyType] {
+	return &tzSet[T, InternalEmptyType]{
+		elements: createNewWithValues[T, InternalEmptyType](),
 	}
 }
 
@@ -307,16 +308,16 @@ func (s *tzSet[T, V]) Subtract(otherSet Set[T, V]) Set[T, V] {
 	return newSet
 }
 
-// Filter returns a new set containing only elements (including the values) for which the filter function returns true.
-// If the filter function is nil, a copy of this set is returned (all elements are included because there is no filter).
+// Filter returns a new set containing only elements (including the values) of this set for which the filter function returns true.
+// If the filter function is nil, a copy of this set is returned (all elements are included because no filter applies).
 // This set remains unchanged.
-func (s *tzSet[T, V]) Filter(filter FilterFunc[T]) Set[T, V] {
-	if filter == nil {
+func (s *tzSet[T, V]) Filter(filterFunc FilterFunc[T, V]) Set[T, V] {
+	if filterFunc == nil {
 		return s.Copy()
 	}
 	newSet := NewWithValues[T, V]()
 	for elem, value := range s.elements {
-		if filter(elem) {
+		if filterFunc(elem, value) {
 			newSet.AddWithValue(elem, value)
 		}
 	}
@@ -342,5 +343,5 @@ func (s *tzSet[T, V]) OneR() (T, V, error) {
 
 	var emptyT T
 	var emptyV V
-	return emptyT, emptyV, fmt.Errorf("cannot get a random element from set because it is empty")
+	return emptyT, emptyV, fmt.Errorf("cannot get a random element from set, set is empty")
 }
