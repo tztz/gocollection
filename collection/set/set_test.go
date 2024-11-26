@@ -1,6 +1,7 @@
 package set
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -10,29 +11,129 @@ import (
 
 func TestZeroValueOfSetIsAnEmptySet(t *testing.T) {
 	// When
-	var set Set[string, string]
-
-	// Then
-	assert.Equal(t, 0, set.Size())
-	assert.Equal(t, []string{}, set.List())
-}
-
-func TestShouldCreateEmptySet(t *testing.T) {
-	// When
-	set1 := NewWithoutValues[string]()
-
+	var set1 tzSet[string, string]
 	// Then
 	assert.Equal(t, 0, set1.Size())
-	assert.False(t, set1.Contains("does not exist"))
 	assert.Equal(t, []string{}, set1.List())
 
 	// When
-	set2 := NewWithValues[string, string]()
-
+	set2 := NewWithoutValues[string]()
 	// Then
 	assert.Equal(t, 0, set2.Size())
-	assert.False(t, set2.Contains("does not exist"))
 	assert.Equal(t, []string{}, set2.List())
+
+	// When
+	set3 := NewWithValues[string, string]()
+	// Then
+	assert.Equal(t, 0, set3.Size())
+	assert.Equal(t, []string{}, set3.List())
+}
+
+func TestShouldCreateNewMapWithValues(t *testing.T) {
+	// Given
+	type myKeyType string
+	type myValueType string
+
+	// When
+	var m map[myKeyType]myValueType
+	// Then
+	assert.Nil(t, m)
+
+	// When
+	m = createNewWithValues[myKeyType, myValueType]()
+	// Then
+	assert.NotNil(t, m)
+	assert.Equal(t, 0, len(m))
+	assert.Equal(t, myValueType(""), m[myKeyType("")])
+
+	// When
+	m[myKeyType("apple")] = myValueType("red")
+	m[myKeyType("banana")] = myValueType("yellow")
+	// Then
+	assert.Equal(t, 2, len(m))
+	assert.Equal(t, myValueType("red"), m[myKeyType("apple")])
+	assert.Equal(t, myValueType("yellow"), m[myKeyType("banana")])
+
+	// When
+	clear(m)
+	// Then
+	assert.Equal(t, 0, len(m))
+}
+
+func TestShouldReturnElementsOfSet(t *testing.T) {
+	// Given
+	set := NewWithValues[string, string]()
+
+	// When
+	elements := set.GetElements()
+	// Then
+	assert.Equal(t, 0, set.Size())
+	assert.Equal(t, 0, len(elements))
+
+	// When
+	set.AddWithValue("apple", "red")
+	set.AddWithValue("banana", "yellow")
+	set.AddWithValue("cherry", "dark red")
+
+	// Then
+	assert.Equal(t, 3, set.Size())
+	assert.Equal(t, 3, len(elements))
+	assert.Equal(t, "red", elements["apple"])
+	assert.Equal(t, "yellow", elements["banana"])
+	assert.Equal(t, "dark red", elements["cherry"])
+}
+
+func TestShouldReturnRandomInt64Numbers(t *testing.T) {
+	// Given
+	set := NewWithoutValues[string]()
+
+	// Expect
+	assert.Equal(t, int64(-1), set.randIndex())
+
+	// When
+	set.AddWithoutValue("apple")
+	set.AddWithoutValue("banana")
+	set.AddWithoutValue("cherry")
+	set.AddWithoutValue("mango")
+	set.AddWithoutValue("orange")
+	set.AddWithoutValue("pear")
+	set.AddWithoutValue("pineapple")
+	set.AddWithoutValue("watermelon")
+	set.AddWithoutValue("kiwi")
+	set.AddWithoutValue("grape")
+	set.AddWithoutValue("strawberry")
+	set.AddWithoutValue("blueberry")
+	set.AddWithoutValue("blackberry")
+	set.AddWithoutValue("raspberry")
+	set.AddWithoutValue("papaya")
+	set.AddWithoutValue("guava")
+	set.AddWithoutValue("lychee")
+	set.AddWithoutValue("passion fruit")
+	set.AddWithoutValue("dragon fruit")
+	set.AddWithoutValue("star fruit")
+	// and
+	count := 100_000
+	var randomNumbers = make([]int64, 0, count)
+	for i := 0; i < count; i++ {
+		randomNumbers = append(randomNumbers, set.randIndex())
+	}
+
+	// Then
+	setSize := int64(set.Size())
+	for i := 0; i < count; i++ {
+		var randomNumber int64 = randomNumbers[i]
+		assert.True(t, randomNumber >= 0)
+		assert.True(t, randomNumber <= setSize-1)
+	}
+	/* This is theoretically flaky, but practically it should work
+	// and
+	numbersMap := map[int64]bool{}
+	assert.Equal(t, 0, len(numbersMap))
+	for i := 0; i < count; i++ {
+		numbersMap[randomNumbers[i]] = true
+	}
+	assert.Equal(t, set.Size(), len(numbersMap))
+	*/
 }
 
 func TestShouldAddItemWithoutValueToSet(t *testing.T) {
@@ -68,7 +169,7 @@ func TestShouldAddItemWithValueToSet(t *testing.T) {
 	// Then
 	assert.Equal(t, 1, set.Size())
 	assert.True(t, set.Contains("apple"))
-	assert.Equal(t, "red", set.elements["apple"])
+	assert.Equal(t, "red", set.GetElements()["apple"])
 
 	// When
 	set.AddWithValue("banana", "yellow")
@@ -76,8 +177,8 @@ func TestShouldAddItemWithValueToSet(t *testing.T) {
 	assert.Equal(t, 2, set.Size())
 	assert.True(t, set.Contains("apple"))
 	assert.True(t, set.Contains("banana"))
-	assert.Equal(t, "red", set.elements["apple"])
-	assert.Equal(t, "yellow", set.elements["banana"])
+	assert.Equal(t, "red", set.GetElements()["apple"])
+	assert.Equal(t, "yellow", set.GetElements()["banana"])
 }
 
 func TestSetWithoutValuesShouldStayUnique(t *testing.T) {
@@ -118,16 +219,16 @@ func TestSetWithValuesShouldStayUnique(t *testing.T) {
 	assert.Equal(t, 2, set.Size())
 	assert.True(t, set.Contains("apple"))
 	assert.True(t, set.Contains("banana"))
-	assert.Equal(t, "red", set.elements["apple"])
-	assert.Equal(t, "yellow", set.elements["banana"])
+	assert.Equal(t, "red", set.GetElements()["apple"])
+	assert.Equal(t, "yellow", set.GetElements()["banana"])
 
 	// When
 	set.AddWithValue("apple", "light red")
 	set.AddWithValue("banana", "dark yellow")
 
 	// Then
-	assert.Equal(t, "light red", set.elements["apple"])
-	assert.Equal(t, "dark yellow", set.elements["banana"])
+	assert.Equal(t, "light red", set.GetElements()["apple"])
+	assert.Equal(t, "dark yellow", set.GetElements()["banana"])
 }
 
 func TestShouldRemoveItemFromSet(t *testing.T) {
@@ -229,19 +330,19 @@ func TestShouldAddAllGivenItemsWithValuesToSet(t *testing.T) {
 	assert.True(t, set1.Contains("banana"))
 	assert.True(t, set1.Contains("cherry"))
 	assert.True(t, set1.Contains("mango"))
-	assert.Equal(t, "red", set1.elements["apple"])
-	assert.Equal(t, "brownish", set1.elements["banana"])
-	assert.Equal(t, "glossy red", set1.elements["cherry"])
-	assert.Equal(t, "green-orange", set1.elements["mango"])
+	assert.Equal(t, "red", set1.GetElements()["apple"])
+	assert.Equal(t, "brownish", set1.GetElements()["banana"])
+	assert.Equal(t, "glossy red", set1.GetElements()["cherry"])
+	assert.Equal(t, "green-orange", set1.GetElements()["mango"])
 
 	// and set2 remains unchanged
 	assert.Equal(t, 3, set2.Size())
 	assert.True(t, set2.Contains("banana"))
 	assert.True(t, set2.Contains("cherry"))
 	assert.True(t, set2.Contains("mango"))
-	assert.Equal(t, "brownish", set2.elements["banana"])
-	assert.Equal(t, "glossy red", set2.elements["cherry"])
-	assert.Equal(t, "green-orange", set2.elements["mango"])
+	assert.Equal(t, "brownish", set2.GetElements()["banana"])
+	assert.Equal(t, "glossy red", set2.GetElements()["cherry"])
+	assert.Equal(t, "green-orange", set2.GetElements()["mango"])
 
 	// When
 	set1.AddAll(nil)
@@ -251,10 +352,10 @@ func TestShouldAddAllGivenItemsWithValuesToSet(t *testing.T) {
 	assert.True(t, set1.Contains("banana"))
 	assert.True(t, set1.Contains("cherry"))
 	assert.True(t, set1.Contains("mango"))
-	assert.Equal(t, "red", set1.elements["apple"])
-	assert.Equal(t, "brownish", set1.elements["banana"])
-	assert.Equal(t, "glossy red", set1.elements["cherry"])
-	assert.Equal(t, "green-orange", set1.elements["mango"])
+	assert.Equal(t, "red", set1.GetElements()["apple"])
+	assert.Equal(t, "brownish", set1.GetElements()["banana"])
+	assert.Equal(t, "glossy red", set1.GetElements()["cherry"])
+	assert.Equal(t, "green-orange", set1.GetElements()["mango"])
 }
 
 func TestShouldRemoveAllGivenItemsFromSet(t *testing.T) {
@@ -635,9 +736,9 @@ func TestShouldCopySetWithValues(t *testing.T) {
 	assert.True(t, copiedSet.Contains("apple"))
 	assert.True(t, copiedSet.Contains("banana"))
 	assert.True(t, copiedSet.Contains("cherry"))
-	assert.Equal(t, "red", copiedSet.elements["apple"])
-	assert.Equal(t, "yellow", copiedSet.elements["banana"])
-	assert.Equal(t, "dark red", copiedSet.elements["cherry"])
+	assert.Equal(t, "red", copiedSet.GetElements()["apple"])
+	assert.Equal(t, "yellow", copiedSet.GetElements()["banana"])
+	assert.Equal(t, "dark red", copiedSet.GetElements()["cherry"])
 
 	// When
 	copiedSet.AddWithValue("mango", "green-orange")
@@ -647,10 +748,10 @@ func TestShouldCopySetWithValues(t *testing.T) {
 	assert.True(t, copiedSet.Contains("banana"))
 	assert.True(t, copiedSet.Contains("cherry"))
 	assert.True(t, copiedSet.Contains("mango"))
-	assert.Equal(t, "red", copiedSet.elements["apple"])
-	assert.Equal(t, "yellow", copiedSet.elements["banana"])
-	assert.Equal(t, "dark red", copiedSet.elements["cherry"])
-	assert.Equal(t, "green-orange", copiedSet.elements["mango"])
+	assert.Equal(t, "red", copiedSet.GetElements()["apple"])
+	assert.Equal(t, "yellow", copiedSet.GetElements()["banana"])
+	assert.Equal(t, "dark red", copiedSet.GetElements()["cherry"])
+	assert.Equal(t, "green-orange", copiedSet.GetElements()["mango"])
 
 	// and set remains unchanged
 	assert.Equal(t, 3, set.Size())
@@ -658,10 +759,10 @@ func TestShouldCopySetWithValues(t *testing.T) {
 	assert.True(t, set.Contains("banana"))
 	assert.True(t, set.Contains("cherry"))
 	assert.False(t, set.Contains("mango"))
-	assert.Equal(t, "red", set.elements["apple"])
-	assert.Equal(t, "yellow", set.elements["banana"])
-	assert.Equal(t, "dark red", set.elements["cherry"])
-	assert.Equal(t, "", set.elements["mango"])
+	assert.Equal(t, "red", set.GetElements()["apple"])
+	assert.Equal(t, "yellow", set.GetElements()["banana"])
+	assert.Equal(t, "dark red", set.GetElements()["cherry"])
+	assert.Equal(t, "", set.GetElements()["mango"])
 }
 
 func TestShouldIntersectTwoSetsWithoutValues(t *testing.T) {
@@ -742,27 +843,27 @@ func TestShouldIntersectTwoSetsWithValues(t *testing.T) {
 	assert.True(t, intersectedSet.Contains("cherry"))
 	assert.False(t, intersectedSet.Contains("apple"))
 	assert.False(t, intersectedSet.Contains("mango"))
-	assert.Equal(t, "brownish", intersectedSet.elements["banana"])
-	assert.Equal(t, "glossy red", intersectedSet.elements["cherry"])
-	assert.Equal(t, "", intersectedSet.elements["apple"])
-	assert.Equal(t, "", intersectedSet.elements["mango"])
+	assert.Equal(t, "brownish", intersectedSet.GetElements()["banana"])
+	assert.Equal(t, "glossy red", intersectedSet.GetElements()["cherry"])
+	assert.Equal(t, "", intersectedSet.GetElements()["apple"])
+	assert.Equal(t, "", intersectedSet.GetElements()["mango"])
 
 	// and set1 and set2 remain unchanged
 	assert.Equal(t, 3, set1.Size())
 	assert.True(t, set1.Contains("apple"))
 	assert.True(t, set1.Contains("banana"))
 	assert.True(t, set1.Contains("cherry"))
-	assert.Equal(t, "red", set1.elements["apple"])
-	assert.Equal(t, "yellow", set1.elements["banana"])
-	assert.Equal(t, "dark red", set1.elements["cherry"])
+	assert.Equal(t, "red", set1.GetElements()["apple"])
+	assert.Equal(t, "yellow", set1.GetElements()["banana"])
+	assert.Equal(t, "dark red", set1.GetElements()["cherry"])
 
 	assert.Equal(t, 3, set2.Size())
 	assert.True(t, set2.Contains("banana"))
 	assert.True(t, set2.Contains("cherry"))
 	assert.True(t, set2.Contains("mango"))
-	assert.Equal(t, "brownish", set2.elements["banana"])
-	assert.Equal(t, "glossy red", set2.elements["cherry"])
-	assert.Equal(t, "green-orange", set2.elements["mango"])
+	assert.Equal(t, "brownish", set2.GetElements()["banana"])
+	assert.Equal(t, "glossy red", set2.GetElements()["cherry"])
+	assert.Equal(t, "green-orange", set2.GetElements()["mango"])
 
 	// When
 	intersectedSet2 := set1.Intersect(nil)
@@ -772,10 +873,10 @@ func TestShouldIntersectTwoSetsWithValues(t *testing.T) {
 	assert.False(t, intersectedSet2.Contains("banana"))
 	assert.False(t, intersectedSet2.Contains("cherry"))
 	assert.False(t, intersectedSet2.Contains("mango"))
-	assert.Equal(t, "", intersectedSet2.elements["apple"])
-	assert.Equal(t, "", intersectedSet2.elements["banana"])
-	assert.Equal(t, "", intersectedSet2.elements["cherry"])
-	assert.Equal(t, "", intersectedSet2.elements["mango"])
+	assert.Equal(t, "", intersectedSet2.GetElements()["apple"])
+	assert.Equal(t, "", intersectedSet2.GetElements()["banana"])
+	assert.Equal(t, "", intersectedSet2.GetElements()["cherry"])
+	assert.Equal(t, "", intersectedSet2.GetElements()["mango"])
 }
 
 func TestShouldUniteTwoSetsWithoutValues(t *testing.T) {
@@ -842,27 +943,27 @@ func TestShouldUniteTwoSetsWithValues(t *testing.T) {
 	assert.True(t, unitedSet.Contains("banana"))
 	assert.True(t, unitedSet.Contains("cherry"))
 	assert.True(t, unitedSet.Contains("mango"))
-	assert.Equal(t, "red", unitedSet.elements["apple"])
-	assert.Equal(t, "brownish", unitedSet.elements["banana"])
-	assert.Equal(t, "glossy red", unitedSet.elements["cherry"])
-	assert.Equal(t, "green-orange", unitedSet.elements["mango"])
+	assert.Equal(t, "red", unitedSet.GetElements()["apple"])
+	assert.Equal(t, "brownish", unitedSet.GetElements()["banana"])
+	assert.Equal(t, "glossy red", unitedSet.GetElements()["cherry"])
+	assert.Equal(t, "green-orange", unitedSet.GetElements()["mango"])
 
 	// and set1 and set2 remain unchanged
 	assert.Equal(t, 3, set1.Size())
 	assert.True(t, set1.Contains("apple"))
 	assert.True(t, set1.Contains("banana"))
 	assert.True(t, set1.Contains("cherry"))
-	assert.Equal(t, "red", set1.elements["apple"])
-	assert.Equal(t, "yellow", set1.elements["banana"])
-	assert.Equal(t, "dark red", set1.elements["cherry"])
+	assert.Equal(t, "red", set1.GetElements()["apple"])
+	assert.Equal(t, "yellow", set1.GetElements()["banana"])
+	assert.Equal(t, "dark red", set1.GetElements()["cherry"])
 
 	assert.Equal(t, 3, set2.Size())
 	assert.True(t, set2.Contains("banana"))
 	assert.True(t, set2.Contains("cherry"))
 	assert.True(t, set2.Contains("mango"))
-	assert.Equal(t, "brownish", set2.elements["banana"])
-	assert.Equal(t, "glossy red", set2.elements["cherry"])
-	assert.Equal(t, "green-orange", set2.elements["mango"])
+	assert.Equal(t, "brownish", set2.GetElements()["banana"])
+	assert.Equal(t, "glossy red", set2.GetElements()["cherry"])
+	assert.Equal(t, "green-orange", set2.GetElements()["mango"])
 
 	// When
 	unitedSet2 := set1.Unite(nil)
@@ -872,9 +973,9 @@ func TestShouldUniteTwoSetsWithValues(t *testing.T) {
 	assert.True(t, unitedSet2.Contains("banana"))
 	assert.True(t, unitedSet2.Contains("cherry"))
 	assert.False(t, unitedSet2.Contains("mango"))
-	assert.Equal(t, "red", unitedSet2.elements["apple"])
-	assert.Equal(t, "yellow", unitedSet2.elements["banana"])
-	assert.Equal(t, "dark red", unitedSet2.elements["cherry"])
+	assert.Equal(t, "red", unitedSet2.GetElements()["apple"])
+	assert.Equal(t, "yellow", unitedSet2.GetElements()["banana"])
+	assert.Equal(t, "dark red", unitedSet2.GetElements()["cherry"])
 }
 
 func TestShouldCreateDisjunctiveUnionOfTwoSetsWithoutValues(t *testing.T) {
@@ -941,27 +1042,27 @@ func TestShouldCreateDisjunctiveUnionOfTwoSetsWithValues(t *testing.T) {
 	assert.True(t, symDifferenceSet.Contains("mango"))
 	assert.False(t, symDifferenceSet.Contains("banana"))
 	assert.False(t, symDifferenceSet.Contains("cherry"))
-	assert.Equal(t, "red", symDifferenceSet.elements["apple"])
-	assert.Equal(t, "green-orange", symDifferenceSet.elements["mango"])
-	assert.Equal(t, "", symDifferenceSet.elements["banana"])
-	assert.Equal(t, "", symDifferenceSet.elements["cherry"])
+	assert.Equal(t, "red", symDifferenceSet.GetElements()["apple"])
+	assert.Equal(t, "green-orange", symDifferenceSet.GetElements()["mango"])
+	assert.Equal(t, "", symDifferenceSet.GetElements()["banana"])
+	assert.Equal(t, "", symDifferenceSet.GetElements()["cherry"])
 
 	// and set1 and set2 remain unchanged
 	assert.Equal(t, 3, set1.Size())
 	assert.True(t, set1.Contains("apple"))
 	assert.True(t, set1.Contains("banana"))
 	assert.True(t, set1.Contains("cherry"))
-	assert.Equal(t, "red", set1.elements["apple"])
-	assert.Equal(t, "yellow", set1.elements["banana"])
-	assert.Equal(t, "dark red", set1.elements["cherry"])
+	assert.Equal(t, "red", set1.GetElements()["apple"])
+	assert.Equal(t, "yellow", set1.GetElements()["banana"])
+	assert.Equal(t, "dark red", set1.GetElements()["cherry"])
 
 	assert.Equal(t, 3, set2.Size())
 	assert.True(t, set2.Contains("banana"))
 	assert.True(t, set2.Contains("cherry"))
 	assert.True(t, set2.Contains("mango"))
-	assert.Equal(t, "brownish", set2.elements["banana"])
-	assert.Equal(t, "glossy red", set2.elements["cherry"])
-	assert.Equal(t, "green-orange", set2.elements["mango"])
+	assert.Equal(t, "brownish", set2.GetElements()["banana"])
+	assert.Equal(t, "glossy red", set2.GetElements()["cherry"])
+	assert.Equal(t, "green-orange", set2.GetElements()["mango"])
 
 	// When
 	symDifferenceSet2 := set1.UniteDisjunctively(nil)
@@ -971,10 +1072,10 @@ func TestShouldCreateDisjunctiveUnionOfTwoSetsWithValues(t *testing.T) {
 	assert.True(t, symDifferenceSet2.Contains("banana"))
 	assert.True(t, symDifferenceSet2.Contains("cherry"))
 	assert.False(t, symDifferenceSet2.Contains("mango"))
-	assert.Equal(t, "red", symDifferenceSet2.elements["apple"])
-	assert.Equal(t, "yellow", symDifferenceSet2.elements["banana"])
-	assert.Equal(t, "dark red", symDifferenceSet2.elements["cherry"])
-	assert.Equal(t, "", symDifferenceSet2.elements["mango"])
+	assert.Equal(t, "red", symDifferenceSet2.GetElements()["apple"])
+	assert.Equal(t, "yellow", symDifferenceSet2.GetElements()["banana"])
+	assert.Equal(t, "dark red", symDifferenceSet2.GetElements()["cherry"])
+	assert.Equal(t, "", symDifferenceSet2.GetElements()["mango"])
 }
 
 func TestShouldSubtractOneSetFromAnotherWithoutValues(t *testing.T) {
@@ -1055,24 +1156,24 @@ func TestShouldSubtractOneSetFromAnotherWithValues(t *testing.T) {
 	assert.False(t, subtractedSet.Contains("banana"))
 	assert.False(t, subtractedSet.Contains("cherry"))
 	assert.False(t, subtractedSet.Contains("mango"))
-	assert.Equal(t, "red", subtractedSet.elements["apple"])
+	assert.Equal(t, "red", subtractedSet.GetElements()["apple"])
 
 	// and set1 and set2 remain unchanged
 	assert.Equal(t, 3, set1.Size())
 	assert.True(t, set1.Contains("apple"))
 	assert.True(t, set1.Contains("banana"))
 	assert.True(t, set1.Contains("cherry"))
-	assert.Equal(t, "red", set1.elements["apple"])
-	assert.Equal(t, "yellow", set1.elements["banana"])
-	assert.Equal(t, "dark red", set1.elements["cherry"])
+	assert.Equal(t, "red", set1.GetElements()["apple"])
+	assert.Equal(t, "yellow", set1.GetElements()["banana"])
+	assert.Equal(t, "dark red", set1.GetElements()["cherry"])
 
 	assert.Equal(t, 3, set2.Size())
 	assert.True(t, set2.Contains("banana"))
 	assert.True(t, set2.Contains("cherry"))
 	assert.True(t, set2.Contains("mango"))
-	assert.Equal(t, "brownish", set2.elements["banana"])
-	assert.Equal(t, "glossy red", set2.elements["cherry"])
-	assert.Equal(t, "green-orange", set2.elements["mango"])
+	assert.Equal(t, "brownish", set2.GetElements()["banana"])
+	assert.Equal(t, "glossy red", set2.GetElements()["cherry"])
+	assert.Equal(t, "green-orange", set2.GetElements()["mango"])
 
 	// When
 	subtractedSet2 := set1.Subtract(nil)
@@ -1082,9 +1183,9 @@ func TestShouldSubtractOneSetFromAnotherWithValues(t *testing.T) {
 	assert.True(t, subtractedSet2.Contains("banana"))
 	assert.True(t, subtractedSet2.Contains("cherry"))
 	assert.False(t, subtractedSet2.Contains("mango"))
-	assert.Equal(t, "red", subtractedSet2.elements["apple"])
-	assert.Equal(t, "yellow", subtractedSet2.elements["banana"])
-	assert.Equal(t, "dark red", subtractedSet2.elements["cherry"])
+	assert.Equal(t, "red", subtractedSet2.GetElements()["apple"])
+	assert.Equal(t, "yellow", subtractedSet2.GetElements()["banana"])
+	assert.Equal(t, "dark red", subtractedSet2.GetElements()["cherry"])
 }
 
 func TestShouldFilterSetWithoutValues(t *testing.T) {
@@ -1146,12 +1247,12 @@ func TestShouldFilterSetWithValues(t *testing.T) {
 	assert.False(t, filteredSet.Contains("apple"))
 	assert.False(t, filteredSet.Contains("cherry"))
 	assert.False(t, filteredSet.Contains("pear"))
-	assert.Equal(t, "yellow", filteredSet.elements["banana"])
-	assert.Equal(t, "green-orange", filteredSet.elements["mango"])
-	assert.Equal(t, "orange", filteredSet.elements["orange"])
-	assert.Equal(t, "", filteredSet.elements["apple"])
-	assert.Equal(t, "", filteredSet.elements["cherry"])
-	assert.Equal(t, "", filteredSet.elements["pear"])
+	assert.Equal(t, "yellow", filteredSet.GetElements()["banana"])
+	assert.Equal(t, "green-orange", filteredSet.GetElements()["mango"])
+	assert.Equal(t, "orange", filteredSet.GetElements()["orange"])
+	assert.Equal(t, "", filteredSet.GetElements()["apple"])
+	assert.Equal(t, "", filteredSet.GetElements()["cherry"])
+	assert.Equal(t, "", filteredSet.GetElements()["pear"])
 
 	// When the filter function is nil
 	filteredSet2 := set.Filter(nil)
@@ -1163,10 +1264,58 @@ func TestShouldFilterSetWithValues(t *testing.T) {
 	assert.True(t, filteredSet2.Contains("mango"))
 	assert.True(t, filteredSet2.Contains("orange"))
 	assert.True(t, filteredSet2.Contains("pear"))
-	assert.Equal(t, "red", filteredSet2.elements["apple"])
-	assert.Equal(t, "yellow", filteredSet2.elements["banana"])
-	assert.Equal(t, "dark red", filteredSet2.elements["cherry"])
-	assert.Equal(t, "green-orange", filteredSet2.elements["mango"])
-	assert.Equal(t, "orange", filteredSet2.elements["orange"])
-	assert.Equal(t, "green", filteredSet2.elements["pear"])
+	assert.Equal(t, "red", filteredSet2.GetElements()["apple"])
+	assert.Equal(t, "yellow", filteredSet2.GetElements()["banana"])
+	assert.Equal(t, "dark red", filteredSet2.GetElements()["cherry"])
+	assert.Equal(t, "green-orange", filteredSet2.GetElements()["mango"])
+	assert.Equal(t, "orange", filteredSet2.GetElements()["orange"])
+	assert.Equal(t, "green", filteredSet2.GetElements()["pear"])
+}
+
+func TestShouldGetOneRandomElementFromSet(t *testing.T) {
+	// Given
+	set1 := NewWithoutValues[string]()
+	set1.AddWithoutValue("apple")
+	set1.AddWithoutValue("banana")
+	set1.AddWithoutValue("cherry")
+	set1.AddWithoutValue("mango")
+	set1.AddWithoutValue("orange")
+	set1.AddWithoutValue("pear")
+
+	// When
+	randomElement1, randomValue1, err1 := set1.OneR()
+
+	// Then
+	assert.True(t, set1.Contains(randomElement1))
+	assert.Equal(t, internalEmptyValue, randomValue1)
+	assert.Nil(t, err1)
+
+	// Given
+	set2 := NewWithValues[string, string]()
+	set2.AddWithValue("apple", "red")
+	set2.AddWithValue("banana", "yellow")
+	set2.AddWithValue("cherry", "dark red")
+	set2.AddWithValue("mango", "green-orange")
+	set2.AddWithValue("orange", "orange")
+	set2.AddWithValue("pear", "green")
+
+	// When
+	randomElement2, randomValue2, err2 := set2.OneR()
+
+	// Then
+	assert.True(t, set2.Contains(randomElement2))
+	assert.Equal(t, randomValue2, set2.GetElements()[randomElement2])
+	assert.Nil(t, err2)
+
+	// Given
+	set3 := NewWithoutValues[string]()
+
+	// When
+	randomElement3, randomValue3, err3 := set3.OneR()
+
+	// Then
+	assert.Equal(t, "", randomElement3)
+	assert.Equal(t, internalEmptyValue, randomValue3)
+	assert.NotNil(t, err3)
+	assert.Equal(t, fmt.Errorf("cannot get a random element from set because it is empty"), err3)
 }
