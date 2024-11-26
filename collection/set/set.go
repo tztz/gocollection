@@ -11,6 +11,7 @@ import (
 type InternalEmptyType struct{}
 
 type FilterFunc[T comparable, V any] func(T, V) bool
+type MapFunc[T comparable, V any] func(T, V) (T, V)
 
 // Set is a collection of unique elements having the same type T.
 // Values of type V can be associated with the elements - but don't have to.
@@ -48,6 +49,7 @@ type Set[T comparable, V any] interface {
 	UniteDisjunctively(Set[T, V]) Set[T, V]
 	Subtract(Set[T, V]) Set[T, V]
 	Filter(FilterFunc[T, V]) Set[T, V]
+	Map(MapFunc[T, V]) Set[T, V]
 
 	OneR() (T, V, error)
 }
@@ -320,6 +322,21 @@ func (s *tzSet[T, V]) Filter(filterFunc FilterFunc[T, V]) Set[T, V] {
 		if filterFunc(elem, value) {
 			newSet.AddWithValue(elem, value)
 		}
+	}
+	return newSet
+}
+
+// Map returns a new set containing all elements (including the values) returned by the map function which is applied to each element of this set.
+// If the map function is nil, a copy of this set is returned (all elements are included because no mapping function is considered like an identity function).
+// This set remains unchanged.
+func (s *tzSet[T, V]) Map(mapFunc MapFunc[T, V]) Set[T, V] {
+	if mapFunc == nil {
+		return s.Copy()
+	}
+	newSet := NewWithValues[T, V]()
+	for elem, value := range s.elements {
+		newElem, newValue := mapFunc(elem, value)
+		newSet.AddWithValue(newElem, newValue)
 	}
 	return newSet
 }

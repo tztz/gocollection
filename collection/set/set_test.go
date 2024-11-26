@@ -1293,6 +1293,56 @@ func TestShouldFilterSetWithValues(t *testing.T) {
 	assert.Equal(t, "green", filteredSet3.GetElements()["pear"])
 }
 
+func TestShouldMapSetWithoutValues(t *testing.T) {
+	// Given
+	set1 := NewWithoutValues[string]()
+	set1.AddWithoutValue("apple")
+	set1.AddWithoutValue("banana")
+	set1.AddWithoutValue("cherry")
+
+	// When
+	mappedSet1 := set1.Map(func(elem string, value InternalEmptyType) (string, InternalEmptyType) {
+		return elem + " fruit", internalEmptyValue
+	})
+
+	// Then
+	assert.Equal(t, 3, mappedSet1.Size())
+	assert.True(t, mappedSet1.Contains("apple fruit"))
+	assert.True(t, mappedSet1.Contains("banana fruit"))
+	assert.True(t, mappedSet1.Contains("cherry fruit"))
+	assert.False(t, mappedSet1.Contains("apple"))
+	assert.False(t, mappedSet1.Contains("banana"))
+	assert.False(t, mappedSet1.Contains("cherry"))
+	assert.Equal(t, internalEmptyValue, mappedSet1.GetElements()["apple fruit"])
+	assert.Equal(t, internalEmptyValue, mappedSet1.GetElements()["banana fruit"])
+	assert.Equal(t, internalEmptyValue, mappedSet1.GetElements()["cherry fruit"])
+}
+
+func TestShouldMapSetWithValues(t *testing.T) {
+	// Given
+	set1 := NewWithValues[string, string]()
+	set1.AddWithValue("apple", "red")
+	set1.AddWithValue("banana", "yellow")
+	set1.AddWithValue("cherry", "dark red")
+
+	// When
+	mappedSet1 := set1.Map(func(elem string, value string) (string, string) {
+		return elem + " fruit", value + " color"
+	})
+
+	// Then
+	assert.Equal(t, 3, mappedSet1.Size())
+	assert.True(t, mappedSet1.Contains("apple fruit"))
+	assert.True(t, mappedSet1.Contains("banana fruit"))
+	assert.True(t, mappedSet1.Contains("cherry fruit"))
+	assert.False(t, mappedSet1.Contains("apple"))
+	assert.False(t, mappedSet1.Contains("banana"))
+	assert.False(t, mappedSet1.Contains("cherry"))
+	assert.Equal(t, "red color", mappedSet1.GetElements()["apple fruit"])
+	assert.Equal(t, "yellow color", mappedSet1.GetElements()["banana fruit"])
+	assert.Equal(t, "dark red color", mappedSet1.GetElements()["cherry fruit"])
+}
+
 func TestShouldGetOneRandomElementFromSet(t *testing.T) {
 	// Given
 	set1 := NewWithoutValues[string]()
