@@ -88,6 +88,7 @@ fmt.Println(intersectedSet.Size()) // 0
 - UniteDisjunctively
 - Subtract
 - Filter
+- Map
 
 #### Random
 
