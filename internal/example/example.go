@@ -46,12 +46,12 @@ func main() {
 	fmt.Println(intersectedSet.Contains("banana"))            // true
 	fmt.Println(intersectedSet.List())                        // [apple banana]
 	fmt.Println(intersectedSet)                               // apple, banana
-	fmt.Println(intersectedSet.StringWithValues())            // apple (green), banana (brownish)
+	fmt.Println(intersectedSet.StringWithValues())            // banana (brownish), apple (green)
 	fmt.Println(set1.Equals(set2))                            // false
 	fmt.Println(intersectedSet.IsSubset(set1))                // true
 	fmt.Println(filteredSet)                                  // cherry, brick
-	fmt.Println(mappedSet)                                    // APPLE, BANANA, CHERRY, BRICK
-	fmt.Println(mappedSet.StringWithValues())                 // APPLE (color: RED), BANANA (color: YELLOW), CHERRY (color: DARK RED), BRICK (color: RED)
+	fmt.Println(mappedSet)                                    // BANANA, CHERRY, BRICK, APPLE
+	fmt.Println(mappedSet.StringWithValues())                 // CHERRY (color: DARK RED), BRICK (color: RED), APPLE (color: RED), BANANA (color: YELLOW)
 	fmt.Printf("elem: %v, value: %v\n", rndElement, rndValue) // elem: banana, value: yellow
 
 	// Clear set
