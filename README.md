@@ -82,3 +82,4 @@ For more examples have a look at the [example.go](/internal/example/example.go) 
 ### Functions
 
 - MapFree
+- MapToList
