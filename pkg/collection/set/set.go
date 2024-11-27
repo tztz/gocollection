@@ -14,6 +14,7 @@ type FilterFunc[T comparable, V any] func(T, V) bool
 type MapFunc[T comparable, V any] func(T, V) (T, V)
 type MapFreeFunc[T comparable, V any, TOut comparable, VOut any] func(T, V) (TOut, VOut)
 type MapToListFunc[T comparable, V any, EOut any] func(T, V) EOut
+type ReduceFunc[T comparable, V any, Acc any] func(T, V, Acc) Acc
 
 // Set is a collection of unique elements having the same type T.
 // Values of type V can be associated with the elements - but don't have to.
@@ -343,7 +344,7 @@ func (s *tzSet[T, V]) Map(mapFunc MapFunc[T, V]) Set[T, V] {
 	return newSet
 }
 
-// MapFree is passed a Set[T, V] together with a map function and returns a new map[TOut]VOut containing all objects returned by the map function which is applied to each element of this set.
+// MapFree is passed a Set[T, V] together with a map function and returns a new map[TOut]VOut containing all objects returned by the map function which is applied to each element of the set.
 // If the map function is nil, an empty map is returned.
 // The given set remains unchanged.
 func MapFree[T comparable, V any, TOut comparable, VOut any](set Set[T, V], mapFunc MapFreeFunc[T, V, TOut, VOut]) map[TOut]VOut {
@@ -358,7 +359,7 @@ func MapFree[T comparable, V any, TOut comparable, VOut any](set Set[T, V], mapF
 	return newSet
 }
 
-// MapToList is passed a Set[T, V] together with a map function and returns a new slice containing all objects returned by the map function which is applied to each element of this set.
+// MapToList is passed a Set[T, V] together with a map function and returns a new slice containing all objects returned by the map function which is applied to each element of the set.
 // If the map function is nil, an empty slice is returned.
 // The given set remains unchanged.
 func MapToList[T comparable, V any, EOut any](set Set[T, V], mapFunc MapToListFunc[T, V, EOut]) []EOut {
@@ -371,6 +372,20 @@ func MapToList[T comparable, V any, EOut any](set Set[T, V], mapFunc MapToListFu
 		newList = append(newList, newListElem)
 	}
 	return newList
+}
+
+// Reduce is passed a Set[T, V] together with a reduce function as well as an initial value and returns the accumulated/reduced value successively calculated by applying the reduce function to each element of the set.
+// If the reduce function is nil, the initial value is returned.
+// The given set remains unchanged.
+func Reduce[T comparable, V any, Acc any](set Set[T, V], reduceFunc func(T, V, Acc) Acc, initial Acc) Acc {
+	if reduceFunc == nil {
+		return initial
+	}
+	var acc = initial
+	for elem, value := range set.GetElements() {
+		acc = reduceFunc(elem, value, acc)
+	}
+	return acc
 }
 
 // OneR returns one random element (and its value) from the set.

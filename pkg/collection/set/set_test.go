@@ -1489,6 +1489,52 @@ func TestShouldMapSetWithValuesToList(t *testing.T) {
 	assert.Equal(t, 0, len(list2))
 }
 
+func TestShouldReduceSetWithoutValues(t *testing.T) {
+	// Given
+	set := NewWithoutValues[string]()
+	set.AddWithoutValue("apple")
+	set.AddWithoutValue("banana")
+	set.AddWithoutValue("cherry")
+
+	// When
+	reducedValue1 := Reduce(set, func(elem string, value InternalEmptyType, acc int) int {
+		return acc + len(elem)
+	}, 1000)
+
+	// Then
+	assert.Equal(t, 1017, reducedValue1)
+
+	// When the reduce function is nil
+	var nilFunc ReduceFunc[string, InternalEmptyType, int] = nil
+	reducedValue2 := Reduce(set, nilFunc, 4711)
+
+	// Then the initial value is returned
+	assert.Equal(t, 4711, reducedValue2)
+}
+
+func TestShouldReduceSetWithValues(t *testing.T) {
+	// Given
+	set := NewWithValues[string, string]()
+	set.AddWithValue("apple", "red")
+	set.AddWithValue("banana", "yellow")
+	set.AddWithValue("cherry", "dark red")
+
+	// When
+	reducedValue1 := Reduce(set, func(elem string, value string, acc int) int {
+		return acc + len(elem) + len(value)
+	}, 1000)
+
+	// Then
+	assert.Equal(t, 1034, reducedValue1)
+
+	// When the reduce function is nil
+	var nilFunc ReduceFunc[string, string, int] = nil
+	reducedValue2 := Reduce(set, nilFunc, 4711)
+
+	// Then the initial value is returned
+	assert.Equal(t, 4711, reducedValue2)
+}
+
 func TestShouldGetOneRandomElementFromSet(t *testing.T) {
 	// Given
 	set1 := NewWithoutValues[string]()
