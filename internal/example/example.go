@@ -38,6 +38,16 @@ func example() {
 		return strings.ToUpper(elem), fmt.Sprintf("color: %v", strings.ToUpper(value))
 	})
 
+	// Freely map set
+	type fruit struct {
+		value string
+	}
+	freelyMappedSet := set.MapFree(set1, func(elem string, value string) (fruit, int) {
+		newElem := fruit{value: value + " " + strings.ToUpper(elem)}
+		newValue := len(elem)
+		return newElem, newValue
+	})
+
 	// One random element
 	rndElement, rndValue, _ := set1.OneR()
 
@@ -52,6 +62,7 @@ func example() {
 	fmt.Println(filteredSet)                                  // cherry, brick
 	fmt.Println(mappedSet)                                    // BANANA, CHERRY, BRICK, APPLE
 	fmt.Println(mappedSet.StringWithValues())                 // CHERRY (color: DARK RED), BRICK (color: RED), APPLE (color: RED), BANANA (color: YELLOW)
+	fmt.Println(freelyMappedSet)                              // map[{dark red CHERRY}:6 {red APPLE}:5 {red BRICK}:5 {yellow BANANA}:6]
 	fmt.Printf("elem: %v, value: %v\n", rndElement, rndValue) // elem: banana, value: yellow
 
 	// Clear set
