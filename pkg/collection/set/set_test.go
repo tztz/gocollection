@@ -1380,10 +1380,9 @@ func TestShouldFreelyMapSetWithoutValues(t *testing.T) {
 	type myString string
 
 	// When
-	var f1 MapFreeFunc[string, InternalEmptyType, myString, int] = func(elem string, value InternalEmptyType) (myString, int) {
+	var mappedSet1 map[myString]int = MapFree(set, func(elem string, value InternalEmptyType) (myString, int) {
 		return myString(elem + " fruit"), len(elem)
-	}
-	var mappedSet1 map[myString]int = MapFree(set, f1)
+	})
 
 	// Then
 	assert.Equal(t, 3, len(mappedSet1))
@@ -1395,8 +1394,8 @@ func TestShouldFreelyMapSetWithoutValues(t *testing.T) {
 	assert.Equal(t, 0, mappedSet1["cherry"])
 
 	// When the map function is nil
-	var f2 MapFreeFunc[string, InternalEmptyType, myString, bool] = nil
-	var mappedSet2 map[myString]bool = MapFree(set, f2)
+	var nilFunc MapFreeFunc[string, InternalEmptyType, myString, bool] = nil
+	var mappedSet2 map[myString]bool = MapFree(set, nilFunc)
 
 	// Then no elements are included
 	assert.Equal(t, 0, len(mappedSet2))
@@ -1412,10 +1411,9 @@ func TestShouldFreelyMapSetWithValues(t *testing.T) {
 	type myString string
 
 	// When
-	var f1 MapFreeFunc[string, string, myString, int] = func(elem string, value string) (myString, int) {
+	var mappedSet1 map[myString]int = MapFree(set, func(elem string, value string) (myString, int) {
 		return myString(elem + " fruit"), len(value)
-	}
-	var mappedSet1 map[myString]int = MapFree(set, f1)
+	})
 
 	// Then
 	assert.Equal(t, 3, len(mappedSet1))
@@ -1427,11 +1425,68 @@ func TestShouldFreelyMapSetWithValues(t *testing.T) {
 	assert.Equal(t, 0, mappedSet1["cherry"])
 
 	// When the map function is nil
-	var f2 MapFreeFunc[string, string, myString, bool] = nil
-	var mappedSet2 map[myString]bool = MapFree(set, f2)
+	var nilFunc MapFreeFunc[string, string, myString, bool] = nil
+	var mappedSet2 map[myString]bool = MapFree(set, nilFunc)
 
 	// Then no elements are included
 	assert.Equal(t, 0, len(mappedSet2))
+}
+
+func TestShouldMapSetWithoutValuesToList(t *testing.T) {
+	// Given
+	set := NewWithoutValues[string]()
+	set.AddWithoutValue("apple")
+	set.AddWithoutValue("banana")
+	set.AddWithoutValue("cherry")
+
+	// When
+	list1 := MapToList(set, func(elem string, value InternalEmptyType) string {
+		return elem + " fruit"
+	})
+
+	// Then
+	assert.Equal(t, 3, len(list1))
+	assert.True(t, slices.Contains(list1, "apple fruit"))
+	assert.True(t, slices.Contains(list1, "banana fruit"))
+	assert.True(t, slices.Contains(list1, "cherry fruit"))
+
+	// When the map function is nil
+	var nilFunc MapToListFunc[string, InternalEmptyType, string] = nil
+	list2 := MapToList(set, nilFunc)
+
+	// Then no elements are included
+	assert.Equal(t, 0, len(list2))
+}
+
+func TestShouldMapSetWithValuesToList(t *testing.T) {
+	// Given
+	set := NewWithValues[string, string]()
+	set.AddWithValue("apple", "red")
+	set.AddWithValue("banana", "yellow")
+	set.AddWithValue("cherry", "dark red")
+
+	type fruit struct {
+		name  string
+		color string
+	}
+
+	// When
+	list1 := MapToList(set, func(elem string, value string) fruit {
+		return fruit{name: elem, color: value}
+	})
+
+	// Then
+	assert.Equal(t, 3, len(list1))
+	assert.True(t, slices.Contains(list1, fruit{name: "apple", color: "red"}))
+	assert.True(t, slices.Contains(list1, fruit{name: "banana", color: "yellow"}))
+	assert.True(t, slices.Contains(list1, fruit{name: "cherry", color: "dark red"}))
+
+	// When the map function is nil
+	var nilFunc MapToListFunc[string, string, fruit] = nil
+	list2 := MapToList(set, nilFunc)
+
+	// Then no elements are included
+	assert.Equal(t, 0, len(list2))
 }
 
 func TestShouldGetOneRandomElementFromSet(t *testing.T) {

@@ -13,6 +13,7 @@ type InternalEmptyType struct{}
 type FilterFunc[T comparable, V any] func(T, V) bool
 type MapFunc[T comparable, V any] func(T, V) (T, V)
 type MapFreeFunc[T comparable, V any, TOut comparable, VOut any] func(T, V) (TOut, VOut)
+type MapToListFunc[T comparable, V any, EOut any] func(T, V) EOut
 
 // Set is a collection of unique elements having the same type T.
 // Values of type V can be associated with the elements - but don't have to.
@@ -344,7 +345,7 @@ func (s *tzSet[T, V]) Map(mapFunc MapFunc[T, V]) Set[T, V] {
 
 // MapFree is passed a Set[T, V] together with a map function and returns a new map[TOut]VOut containing all objects returned by the map function which is applied to each element of this set.
 // If the map function is nil, an empty map is returned.
-// This set remains unchanged.
+// The given set remains unchanged.
 func MapFree[T comparable, V any, TOut comparable, VOut any](set Set[T, V], mapFunc MapFreeFunc[T, V, TOut, VOut]) map[TOut]VOut {
 	if mapFunc == nil {
 		return make(map[TOut]VOut)
@@ -355,6 +356,21 @@ func MapFree[T comparable, V any, TOut comparable, VOut any](set Set[T, V], mapF
 		newSet[newElem] = newValue
 	}
 	return newSet
+}
+
+// MapToList is passed a Set[T, V] together with a map function and returns a new slice containing all objects returned by the map function which is applied to each element of this set.
+// If the map function is nil, an empty slice is returned.
+// The given set remains unchanged.
+func MapToList[T comparable, V any, EOut any](set Set[T, V], mapFunc MapToListFunc[T, V, EOut]) []EOut {
+	if mapFunc == nil {
+		return make([]EOut, 0)
+	}
+	newList := make([]EOut, 0, set.Size())
+	for elem, value := range set.GetElements() {
+		newListElem := mapFunc(elem, value)
+		newList = append(newList, newListElem)
+	}
+	return newList
 }
 
 // OneR returns one random element (and its value) from the set.
