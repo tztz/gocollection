@@ -1,3 +1,4 @@
 #/bin/bash
 
-go test -v ./...
+mkdir -p out
+go test -v -vet=all ./... -covermode=count -coverprofile=out/coverage.out
