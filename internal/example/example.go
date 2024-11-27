@@ -48,6 +48,15 @@ func example() {
 		return newElem, newValue
 	})
 
+	// Map to list
+	type fruitSpec struct {
+		name  string
+		color string
+	}
+	list := set.MapToList(set1, func(elem string, value string) fruitSpec {
+		return fruitSpec{name: elem, color: value}
+	})
+
 	// One random element
 	rndElement, rndValue, _ := set1.OneR()
 
@@ -63,6 +72,7 @@ func example() {
 	fmt.Println(mappedSet)                                    // BANANA, CHERRY, BRICK, APPLE
 	fmt.Println(mappedSet.StringWithValues())                 // CHERRY (color: DARK RED), BRICK (color: RED), APPLE (color: RED), BANANA (color: YELLOW)
 	fmt.Println(freelyMappedSet)                              // map[{dark red CHERRY}:6 {red APPLE}:5 {red BRICK}:5 {yellow BANANA}:6]
+	fmt.Println(list)                                         // [{apple red} {banana yellow} {cherry dark red} {brick red}]
 	fmt.Printf("elem: %v, value: %v\n", rndElement, rndValue) // elem: banana, value: yellow
 
 	// Clear set
