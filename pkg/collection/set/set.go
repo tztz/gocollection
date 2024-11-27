@@ -12,6 +12,7 @@ type InternalEmptyType struct{}
 
 type FilterFunc[T comparable, V any] func(T, V) bool
 type MapFunc[T comparable, V any] func(T, V) (T, V)
+type MapFreeFunc[T comparable, V any, TOut comparable, VOut any] func(T, V) (TOut, VOut)
 
 // Set is a collection of unique elements having the same type T.
 // Values of type V can be associated with the elements - but don't have to.
@@ -311,7 +312,7 @@ func (s *tzSet[T, V]) Subtract(otherSet Set[T, V]) Set[T, V] {
 }
 
 // Filter returns a new set containing only elements (including the values) of this set for which the filter function returns true.
-// If the filter function is nil, a copy of this set is returned (all elements are included because no filter applies).
+// If the filter function is nil, a copy of this set is returned (all elements with their values are included because no filter applies).
 // This set remains unchanged.
 func (s *tzSet[T, V]) Filter(filterFunc FilterFunc[T, V]) Set[T, V] {
 	if filterFunc == nil {
@@ -326,8 +327,8 @@ func (s *tzSet[T, V]) Filter(filterFunc FilterFunc[T, V]) Set[T, V] {
 	return newSet
 }
 
-// Map returns a new set containing all elements (including the values) returned by the map function which is applied to each element of this set.
-// If the map function is nil, a copy of this set is returned (all elements are included because having no mapping function behaves like identity mapping).
+// Map returns a new Set[T, V] containing all elements of type T (including the values of type V) returned by the map function which is applied to each element of this set.
+// If the map function is nil, a copy of this set is returned (all elements with their values are included because having no mapping function behaves like identity mapping).
 // This set remains unchanged.
 func (s *tzSet[T, V]) Map(mapFunc MapFunc[T, V]) Set[T, V] {
 	if mapFunc == nil {
@@ -337,6 +338,21 @@ func (s *tzSet[T, V]) Map(mapFunc MapFunc[T, V]) Set[T, V] {
 	for elem, value := range s.elements {
 		newElem, newValue := mapFunc(elem, value)
 		newSet.AddWithValue(newElem, newValue)
+	}
+	return newSet
+}
+
+// MapFree is passed a Set[T, V] together with a map function and returns a new map[TOut]VOut containing all objects returned by the map function which is applied to each element of this set.
+// If the map function is nil, an empty map is returned.
+// This set remains unchanged.
+func MapFree[T comparable, V any, TOut comparable, VOut any](set Set[T, V], mapFunc MapFreeFunc[T, V, TOut, VOut]) map[TOut]VOut {
+	if mapFunc == nil {
+		return make(map[TOut]VOut)
+	}
+	newSet := make(map[TOut]VOut)
+	for elem, value := range set.GetElements() {
+		newElem, newValue := mapFunc(elem, value)
+		newSet[newElem] = newValue
 	}
 	return newSet
 }

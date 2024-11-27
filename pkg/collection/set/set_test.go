@@ -1370,6 +1370,70 @@ func TestShouldMapSetWithValues(t *testing.T) {
 	assert.Equal(t, "dark red", mappedSet2.GetElements()["cherry"])
 }
 
+func TestShouldFreelyMapSetWithoutValues(t *testing.T) {
+	// Given
+	set := NewWithoutValues[string]()
+	set.AddWithoutValue("apple")
+	set.AddWithoutValue("banana")
+	set.AddWithoutValue("cherry")
+
+	type myString string
+
+	// When
+	var f1 MapFreeFunc[string, InternalEmptyType, myString, int] = func(elem string, value InternalEmptyType) (myString, int) {
+		return myString(elem + " fruit"), len(elem)
+	}
+	var mappedSet1 map[myString]int = MapFree(set, f1)
+
+	// Then
+	assert.Equal(t, 3, len(mappedSet1))
+	assert.True(t, mappedSet1["apple fruit"] == 5)
+	assert.True(t, mappedSet1["banana fruit"] == 6)
+	assert.True(t, mappedSet1["cherry fruit"] == 6)
+	assert.Equal(t, 0, mappedSet1["apple"])
+	assert.Equal(t, 0, mappedSet1["banana"])
+	assert.Equal(t, 0, mappedSet1["cherry"])
+
+	// When the map function is nil
+	var f2 MapFreeFunc[string, InternalEmptyType, myString, bool] = nil
+	var mappedSet2 map[myString]bool = MapFree(set, f2)
+
+	// Then no elements are included
+	assert.Equal(t, 0, len(mappedSet2))
+}
+
+func TestShouldFreelyMapSetWithValues(t *testing.T) {
+	// Given
+	set := NewWithValues[string, string]()
+	set.AddWithValue("apple", "red")
+	set.AddWithValue("banana", "yellow")
+	set.AddWithValue("cherry", "dark red")
+
+	type myString string
+
+	// When
+	var f1 MapFreeFunc[string, string, myString, int] = func(elem string, value string) (myString, int) {
+		return myString(elem + " fruit"), len(value)
+	}
+	var mappedSet1 map[myString]int = MapFree(set, f1)
+
+	// Then
+	assert.Equal(t, 3, len(mappedSet1))
+	assert.True(t, mappedSet1["apple fruit"] == 3)
+	assert.True(t, mappedSet1["banana fruit"] == 6)
+	assert.True(t, mappedSet1["cherry fruit"] == 8)
+	assert.Equal(t, 0, mappedSet1["apple"])
+	assert.Equal(t, 0, mappedSet1["banana"])
+	assert.Equal(t, 0, mappedSet1["cherry"])
+
+	// When the map function is nil
+	var f2 MapFreeFunc[string, string, myString, bool] = nil
+	var mappedSet2 map[myString]bool = MapFree(set, f2)
+
+	// Then no elements are included
+	assert.Equal(t, 0, len(mappedSet2))
+}
+
 func TestShouldGetOneRandomElementFromSet(t *testing.T) {
 	// Given
 	set1 := NewWithoutValues[string]()
