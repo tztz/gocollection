@@ -22,10 +22,10 @@ func example() []string {
 	set2.AddWithValue("mango", "green-orange")
 	set2.AddWithValue("brick", "red")
 
-	// Remove element
+	// Remove element from set
 	set2.Remove("brick")
 
-	// Calculate intersection
+	// Calculate intersection of two sets
 	intersectedSet := set1.Intersect(set2)
 
 	// Filter set
@@ -48,7 +48,7 @@ func example() []string {
 		return newElem, newValue
 	})
 
-	// Map to list
+	// Map set to list
 	type fruitSpec struct {
 		name  string
 		color string
@@ -62,7 +62,7 @@ func example() []string {
 		return acc + len(elem)
 	}, 0)
 
-	// One random element
+	// Get one random element from set
 	rndElement, rndValue, _ := set1.OneR()
 
 	results := make([]string, 0)
