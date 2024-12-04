@@ -41,6 +41,7 @@ type Set[T comparable, V any] interface {
 	Size() int
 	List() []T
 	Contains(T) bool
+	ContainsAny(...T) bool
 	Equals(Set[T, V]) bool
 	IsSubset(Set[T, V]) bool
 	String() string
@@ -168,6 +169,18 @@ func (s *tzSet[T, V]) List() []T {
 func (s *tzSet[T, V]) Contains(element T) bool {
 	_, exists := s.elements[element]
 	return exists
+}
+
+// ContainsAny checks if the set contains at least one of the given elements (ignoring the values).
+// Returns true if at least one of the given elements is in the set, false otherwise.
+// The elements' values are not considered when checking for containment.
+func (s *tzSet[T, V]) ContainsAny(elements ...T) bool {
+	for _, elem := range elements {
+		if _, exists := s.elements[elem]; exists {
+			return true
+		}
+	}
+	return false
 }
 
 // Equals checks if this set is equal to otherSet ignoring the values.

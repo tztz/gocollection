@@ -67,6 +67,8 @@ func example() []string {
 
 	results := make([]string, 0)
 
+	results = append(results, fmt.Sprintln(intersectedSet.Contains("brick")))             // false
+	results = append(results, fmt.Sprintln(intersectedSet.ContainsAny("apple", "brick"))) // true
 	results = append(results, fmt.Sprintln(intersectedSet.GetElements()))                 // map[apple:green banana:brownish]
 	results = append(results, fmt.Sprintln(intersectedSet.Size()))                        // 2
 	results = append(results, fmt.Sprintln(intersectedSet.Contains("banana")))            // true

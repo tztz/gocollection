@@ -472,7 +472,77 @@ func TestShouldListAllSetItems(t *testing.T) {
 	assert.Equal(t, 0, emptySet.Size())
 }
 
-// TODO: Add tests for Contains
+func TestShouldCheckIfSetWithoutValuesContainsTheGivenItem(t *testing.T) {
+	// Given
+	set := NewWithoutValues[string]()
+	set.AddWithoutValue("apple")
+	set.AddWithoutValue("banana")
+	set.AddWithoutValue("cherry")
+
+	// Expect
+	assert.True(t, set.Contains("apple"))
+	assert.True(t, set.Contains("banana"))
+	assert.True(t, set.Contains("cherry"))
+	assert.False(t, set.Contains("mango"))
+	assert.False(t, set.Contains("pear"))
+	assert.False(t, set.Contains("kiwi"))
+}
+
+func TestShouldCheckIfSetWithValuesContainsTheGivenItem(t *testing.T) {
+	// Given
+	set := NewWithValues[string, string]()
+	set.AddWithValue("apple", "red")
+	set.AddWithValue("banana", "yellow")
+	set.AddWithValue("cherry", "dark red")
+
+	// Expect
+	assert.True(t, set.Contains("apple"))
+	assert.True(t, set.Contains("banana"))
+	assert.True(t, set.Contains("cherry"))
+	assert.False(t, set.Contains("mango"))
+	assert.False(t, set.Contains("pear"))
+	assert.False(t, set.Contains("kiwi"))
+}
+
+func TestShouldCheckIfSetWithoutValuesContainsAtLeastOneOfTheGivenItems(t *testing.T) {
+	// Given
+	set := NewWithoutValues[string]()
+	set.AddWithoutValue("apple")
+	set.AddWithoutValue("banana")
+	set.AddWithoutValue("cherry")
+
+	// Expect
+	assert.True(t, set.ContainsAny("apple"))
+	assert.True(t, set.ContainsAny("banana"))
+	assert.True(t, set.ContainsAny("cherry"))
+	assert.True(t, set.ContainsAny("apple", "banana"))
+	assert.True(t, set.ContainsAny("banana", "cherry"))
+	assert.True(t, set.ContainsAny("apple", "cherry"))
+	assert.True(t, set.ContainsAny("apple", "banana", "cherry"))
+	assert.False(t, set.ContainsAny("mango", "pear", "kiwi"))
+	assert.False(t, set.ContainsAny("mango"))
+	assert.False(t, set.ContainsAny("mango", "brick"))
+}
+
+func TestShouldCheckIfSetWithValuesContainsAtLeastOneOfTheGivenItems(t *testing.T) {
+	// Given
+	set := NewWithValues[string, string]()
+	set.AddWithValue("apple", "red")
+	set.AddWithValue("banana", "yellow")
+	set.AddWithValue("cherry", "dark red")
+
+	// Expect
+	assert.True(t, set.ContainsAny("apple"))
+	assert.True(t, set.ContainsAny("banana"))
+	assert.True(t, set.ContainsAny("cherry"))
+	assert.True(t, set.ContainsAny("apple", "banana"))
+	assert.True(t, set.ContainsAny("banana", "cherry"))
+	assert.True(t, set.ContainsAny("apple", "cherry"))
+	assert.True(t, set.ContainsAny("apple", "banana", "cherry"))
+	assert.False(t, set.ContainsAny("mango", "pear", "kiwi"))
+	assert.False(t, set.ContainsAny("mango"))
+	assert.False(t, set.ContainsAny("mango", "brick"))
+}
 
 func TestTwoSetsWithoutValuesAndWithSameContentShouldBeEqual(t *testing.T) {
 	// Given

@@ -60,6 +60,7 @@ For more examples have a look at the [example.go](/internal/example/example.go) 
 - Size
 - List
 - Contains
+- ContainsAny
 - Equals
 - IsSubset
 - String
