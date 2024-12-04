@@ -59,12 +59,15 @@ For more examples have a look at the [example.go](/internal/example/example.go) 
 
 - Size
 - List
+- String
+- StringWithValues
+
+#### Conditional checks
+
 - Contains
 - ContainsAny
 - Equals
 - IsSubset
-- String
-- StringWithValues
 
 #### Creating new set
 
